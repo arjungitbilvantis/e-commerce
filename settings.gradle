@@ -1,0 +1,8 @@
+rootProject.name = 'e-commerce-API'
+
+// submodules
+include 'e-commerce-api'
+include 'e-commerce-app'
+include 'e-commerce-dao'
+include 'e-commerce-data-model'
+

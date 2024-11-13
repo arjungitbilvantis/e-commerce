@@ -1,0 +1,10 @@
+plugins {
+    id "org.springframework.boot" version "3.1.1"
+}
+dependencies {
+    implementation project(':e-commerce-api')
+    implementation project(':e-commerce-data-model')
+    implementation project(':e-commerce-dao')
+    implementation 'org.springframework.boot:spring-boot-starter'
+    runtimeOnly 'mysql:mysql-connector-java'
+}
