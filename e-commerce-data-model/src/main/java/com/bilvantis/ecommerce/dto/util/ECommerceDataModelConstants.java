@@ -15,6 +15,7 @@ public class ECommerceDataModelConstants {
     public static final String ERROR_MESSAGE_FOR_INVALID_PHONE_NUMBER = "Please enter valid phone number";
     public static final String REGEX_PATTERN_FOR_LAST_NAME = "^(?:[a-zA-Z&@#$%^*()\\[\\]{}!?,.\\-+_=`~'\":;<>]|(?<!^|\\s)\\s)*(?<!\\s)$";
     public static final String MESSAGE_USER_PHONE_NUMBER_ON_CREATE = "User phone number should not be null or empty on create";
+    public static final String MESSAGE_USER_GENDER_ON_CREATE = "User gender should not be null or empty on create";
     public static final String MESSAGE_USER_EMAIL_ON_CREATE = "User e mail should not be null or empty on create";
     public static final String REGEX_PATTERN_FOR_GENDER = "Male|Female|Other";
     public static final String MESSAGE_GENDER = "Gender must be Male, Female, or Other";

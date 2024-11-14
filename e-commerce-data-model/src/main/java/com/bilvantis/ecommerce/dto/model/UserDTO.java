@@ -39,6 +39,7 @@ public class UserDTO extends BaseDTO implements Serializable {
     @Pattern(regexp = REGEX_PATTERN_FOR_PHONE_NUMBER, message = ERROR_MESSAGE_FOR_INVALID_PHONE_NUMBER)
     private String phoneNumber;
 
+    @NotBlank(groups = OnCreate.class, message = MESSAGE_USER_GENDER_ON_CREATE)
     @Pattern(regexp = REGEX_PATTERN_FOR_GENDER, message = MESSAGE_GENDER)
     private String gender;
 
