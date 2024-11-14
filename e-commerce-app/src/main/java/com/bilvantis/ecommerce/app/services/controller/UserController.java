@@ -30,14 +30,25 @@ public class UserController {
     }
 
 
+    /**
+     * Creates a new user.
+     *
+     * @param userDTO the UserDTO object containing user details, must not be null and must be valid
+     * @return ResponseEntity containing the UserResponseDTO and HTTP status CREATED
+     */
     @Validated(OnCreate.class)
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(@NotNull @Valid @RequestBody UserDTO userDTO) {
         return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(
-                userService.createUser(userDTO),null, ECommerceAppConstant.SUCCESS), HttpStatus.CREATED);
+                userService.createUser(userDTO), null, ECommerceAppConstant.SUCCESS), HttpStatus.CREATED);
     }
 
-    // Get User by ID
+    /**
+     * Retrieves a user by their unique user ID.
+     *
+     * @param id the unique identifier of the user, must not be null
+     * @return ResponseEntity containing the UserResponseDTO and HTTP status OK
+     */
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserByUserId(@NotNull @PathVariable UUID id) {
         UserDTO userDTO = userService.getUserByUserId(id.toString());
@@ -45,7 +56,11 @@ public class UserController {
                 userDTO, null, ECommerceAppConstant.SUCCESS), HttpStatus.OK);
     }
 
-    // Get All Users
+    /**
+     * Retrieves all users.
+     *
+     * @return ResponseEntity containing a list of UserDTOs and HTTP status OK
+     */
     @GetMapping
     public ResponseEntity<UserResponseDTO> getAllUsers() {
         List<UserDTO> userDTOList = userService.getAllUsers();
@@ -54,7 +69,13 @@ public class UserController {
                 HttpStatus.OK);
     }
 
-    // Update User by ID
+    /**
+     * Updates an existing user.
+     *
+     * @param id      the unique identifier of the user, must not be null
+     * @param userDTO the UserDTO object containing updated user details, must not be null and must be valid
+     * @return ResponseEntity containing the updated UserResponseDTO and HTTP status OK
+     */
     @Validated(OnUpdate.class)
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(@NotNull @PathVariable String id,
@@ -64,7 +85,12 @@ public class UserController {
                 updatedUserDTO, null, ECommerceAppConstant.SUCCESS), HttpStatus.OK);
     }
 
-    // Delete User by ID
+    /**
+     * Deletes a user by their unique user ID.
+     *
+     * @param id the unique identifier of the user, must not be null
+     * @return ResponseEntity containing the status of the operation and HTTP status NO_CONTENT
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<UserResponseDTO> deleteUser(@NotNull @PathVariable String id) {
         userService.deleteUserByUserId(id);

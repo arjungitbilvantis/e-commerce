@@ -1,7 +1,9 @@
 package com.bilvantis.ecommerce.api.service.impl;
 
 import com.bilvantis.ecommerce.api.exception.ApplicationException;
+import com.bilvantis.ecommerce.api.service.EmailService;
 import com.bilvantis.ecommerce.api.service.UserService;
+import com.bilvantis.ecommerce.api.util.EmailDetails;
 import com.bilvantis.ecommerce.api.util.UserSupport;
 import com.bilvantis.ecommerce.dao.data.model.User;
 import com.bilvantis.ecommerce.dao.data.repository.UserRepository;
@@ -9,10 +11,7 @@ import com.bilvantis.ecommerce.dto.model.UserDTO;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.bilvantis.ecommerce.api.util.UserConstants.*;
 import static com.bilvantis.ecommerce.api.util.UserSupport.*;
@@ -23,8 +22,11 @@ public class UserServiceImpl implements UserService<UserDTO, UUID> {
 
     private final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    private final EmailService emailService;
+
+    public UserServiceImpl(UserRepository userRepository, EmailService emailService) {
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     /**
@@ -54,8 +56,20 @@ public class UserServiceImpl implements UserService<UserDTO, UUID> {
             UUID generatedUserId = UUID.randomUUID();
             user.setUserId(generatedUserId.toString());
 
+            // Generate and set the OTP for verification
+            String otp = generateOtp();
+            user.setOtp(otp);
+
             // Save the user entity
-            return convertUserEntityToUserDTO(userRepository.save(user));
+            User savedUser = userRepository.save(user);
+
+            // Send verification email
+            EmailDetails emailDetails = new EmailDetails();
+            emailDetails.setRecipient(userDTO.getEmail());
+            emailDetails.setSubject(REGISTRATION_SUCCESS_EMAIL_SUBJECT);
+            emailService.sendMailOtpGeneration(emailDetails, savedUser);
+
+            return convertUserEntityToUserDTO(savedUser);
         } catch (DataAccessException e) {
             throw new ApplicationException(USER_SAVE_FAILED);
         }
@@ -188,6 +202,17 @@ public class UserServiceImpl implements UserService<UserDTO, UUID> {
         return users.stream()
                 .map(UserSupport::convertUserEntityToUserDTO)
                 .toList();
+    }
+
+    /**
+     * Generates a 6-digit One-Time Password (OTP).
+     *
+     * @return a String representation of the 6-digit OTP
+     */
+    private String generateOtp() {
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000); // 6-digit OTP
+        return String.valueOf(otp);
     }
 
 }

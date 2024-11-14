@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import static com.bilvantis.ecommerce.dto.util.ECommerceDataModelConstants.*;
 
@@ -31,11 +30,12 @@ public class UserDTO extends BaseDTO implements Serializable {
     @Pattern(regexp = REGEX_PATTERN_FOR_LAST_NAME, message = NAME_MESSAGE)
     private String lastName;
 
+    @NotBlank(groups = OnCreate.class, message = MESSAGE_USER_EMAIL_ON_CREATE)
     @Size(max = 100, message = EMAIL_LENGTH_MESSAGE)
     @Email(regexp = REGEX_PATTERN_FOR_EMAIL, flags = Pattern.Flag.CASE_INSENSITIVE)
     private String email;
 
-    @NotBlank(groups = OnCreate.class, message = MESSAGE_WORKER_PHONE_NUMBER_ON_CREATE)
+    @NotBlank(groups = OnCreate.class, message = MESSAGE_USER_PHONE_NUMBER_ON_CREATE)
     @Pattern(regexp = REGEX_PATTERN_FOR_PHONE_NUMBER, message = ERROR_MESSAGE_FOR_INVALID_PHONE_NUMBER)
     private String phoneNumber;
 

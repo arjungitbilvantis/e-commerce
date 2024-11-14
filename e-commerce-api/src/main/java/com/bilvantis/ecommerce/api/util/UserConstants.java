@@ -13,4 +13,6 @@ public class UserConstants {
     public static final String ERROR_UPDATING_USER = "Error updating user with id: %s";
     public static final String ERROR_DELETING_USER = "Error deleting user with id: %s";
     public static final String USER_ID_MISMATCH = "User ID mismatch: provided ID %s does not match DTO ID %s";
+    public static final String REGISTRATION_SUCCESS_EMAIL_SUBJECT = "Registration Successful - OTP Verification";
+
 }

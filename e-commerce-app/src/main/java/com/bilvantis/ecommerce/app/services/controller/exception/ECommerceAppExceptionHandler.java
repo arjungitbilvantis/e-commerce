@@ -4,6 +4,9 @@ import com.bilvantis.ecommerce.api.exception.ApplicationException;
 import com.bilvantis.ecommerce.api.exception.ErrorResponse;
 import com.bilvantis.ecommerce.app.services.model.UserResponseDTO;
 import com.bilvantis.ecommerce.app.services.util.UserRequestResponseBuilder;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,6 +17,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.StreamSupport;
 
 import static com.bilvantis.ecommerce.app.services.util.ECommerceAppConstant.*;
 
@@ -69,4 +75,21 @@ public class ECommerceAppExceptionHandler {
         return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ERROR), HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles ConstraintViolationException and constructs a detailed error response.
+     *
+     * @param exception the ConstraintViolationException thrown when a constraint is violated
+     * @return ResponseEntity containing UserResponseDTO with error details and HTTP status BAD_REQUEST
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<UserResponseDTO> handleConstraintViolationException(ConstraintViolationException exception) {
+        List<ErrorResponse> errors = new ArrayList<>();
+        Set<ConstraintViolation<?>> constraintViolations = exception.getConstraintViolations();
+        constraintViolations.forEach(constraintViolation -> {
+            Path.Node lastNode = StreamSupport.stream(constraintViolation.getPropertyPath().spliterator(), false)
+                    .reduce((first, second) -> second).orElse(null);
+            errors.add(new ErrorResponse(constraintViolation.getMessage(), Objects.nonNull(lastNode) ? lastNode.getName() : null));
+        });
+        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ERROR), HttpStatus.BAD_REQUEST);
+    }
 }
