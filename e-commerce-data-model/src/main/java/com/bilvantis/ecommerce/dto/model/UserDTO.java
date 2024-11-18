@@ -43,6 +43,7 @@ public class UserDTO extends BaseDTO implements Serializable {
     @Pattern(regexp = REGEX_PATTERN_FOR_GENDER, message = MESSAGE_GENDER)
     private String gender;
 
+    @NotNull(groups = OnCreate.class, message = MESSAGE_USER_TYPE_ON_CREATE)
     @ValidEnum(enumClass = UserTypeDTO.class, message = MESSAGE_INVALID_USER_TYPE)
     private UserTypeDTO userTypeDTO;
 

@@ -20,6 +20,8 @@ public class ECommerceDataModelConstants {
     public static final String REGEX_PATTERN_FOR_GENDER = "Male|Female|Other";
     public static final String MESSAGE_GENDER = "Gender must be Male, Female, or Other";
     public static final String MESSAGE_INVALID_USER_TYPE = "Invalid user type";
+
+    public static final String MESSAGE_USER_TYPE_ON_CREATE = "User type should not be null or empty on create";
     public static final String MESSAGE_ADDRESS_REQUIRED_ON_CREATE = "Address is required on creation";
     public static final String MESSAGE_ADDRESS_LENGTH = "Address must be between 10 and 255 characters";
     public static final int ADDRESS_MIN_LENGTH = 10;
