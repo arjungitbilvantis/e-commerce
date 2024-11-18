@@ -5,10 +5,14 @@ import com.bilvantis.ecommerce.api.exception.ResourceNotFoundException;
 import com.bilvantis.ecommerce.api.service.EmailService;
 import com.bilvantis.ecommerce.api.service.LoginService;
 import com.bilvantis.ecommerce.api.service.UserService;
-import com.bilvantis.ecommerce.api.util.*;
+import com.bilvantis.ecommerce.api.util.EmailDetails;
+import com.bilvantis.ecommerce.api.util.EmailSupport;
+import com.bilvantis.ecommerce.api.util.JwtUtil;
+import com.bilvantis.ecommerce.api.util.Predicates;
 import com.bilvantis.ecommerce.dao.data.model.User;
 import com.bilvantis.ecommerce.dao.data.repository.UserRepository;
 import com.bilvantis.ecommerce.dto.model.UserDTO;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataAccessException;
@@ -19,7 +23,6 @@ import java.util.Random;
 import java.util.UUID;
 
 import static com.bilvantis.ecommerce.api.util.LoginConstants.*;
-import static com.bilvantis.ecommerce.api.util.UserSupport.convertUserEntityToUserDTO;
 
 @Service("loginServiceImpl")
 @Slf4j
@@ -27,23 +30,26 @@ public class LoginServiceImpl implements LoginService<UserDTO> {
 
     private final UserRepository userRepository;
 
-    private final ECommerceProperties eCommerceProperties;
-
     private final EmailService emailService;
 
-
-    private final UserService<UserDTO, UUID> userService;
     private final JwtUtil jwtUtil;
 
-    public LoginServiceImpl(UserRepository userRepository, ECommerceProperties eCommerceProperties, EmailService emailService, UserService<UserDTO, UUID> userService, JwtUtil jwtUtil) {
+    public LoginServiceImpl(UserRepository userRepository, EmailService emailService, UserService<UserDTO, UUID> userService, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
-        this.eCommerceProperties = eCommerceProperties;
         this.emailService = emailService;
-        this.userService = userService;
         this.jwtUtil = jwtUtil;
     }
 
 
+    /**
+     * Verifies the user's login by checking the provided phone number and OTP.
+     *
+     * @param phoneNumber the phone number of the user
+     * @param otp         the one-time password provided by the user
+     * @return a JWT token if the login is successful
+     * @throws ResourceNotFoundException if the phone number or OTP is empty, or if the user is not found
+     * @throws ApplicationException      if there is a mismatch between the phone number and OTP, or if there is a database access error or unexpected error
+     */
     @Override
     public String verifyUserLogin(String phoneNumber, String otp) {
         try {
@@ -85,29 +91,44 @@ public class LoginServiceImpl implements LoginService<UserDTO> {
         }
     }
 
-
+    /**
+     * Sends a one-time password (OTP) to the user's email based on their phone number.
+     *
+     * @param phoneNumber the phone number of the user
+     * @return a message indicating that the OTP has been sent successfully
+     * @throws ApplicationException if the phone number is invalid, the user is not available, or there is a data access error
+     */
+    @Transactional
     @Override
     public String sendOneTimePasswordMail(String phoneNumber) {
         try {
             if (!Predicates.isValidPhoneNumber.test(phoneNumber)) {
                 throw new ApplicationException(INVALID_PHONE_NUMBER);
             }
+
             Optional<User> userOptional = userRepository.findByPhoneNumber(phoneNumber);
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
-                Random random = new Random();
-                String randomSixDigit = String.format(eCommerceProperties.getOtpFormatPercentage(), random.nextInt(Integer.parseInt(eCommerceProperties.getOtpNoOfDigitsBound())));
+
+                // Generate a 6-digit random OTP
+                String randomSixDigit = String.format(OTP_FORMAT, new Random().nextInt(1000000));
+
                 user.setOtp(randomSixDigit);
                 user.setOtpGenerationTime(System.currentTimeMillis());
-                UserDTO userDTO = convertUserEntityToUserDTO(user);
-                EmailDetails emailDetails = EmailSupport.settingEmailDetails(user.getEmail(), eCommerceProperties.getSubjectForOtpGeneration());
+
+                // Prepare email details and send the OTP
+                EmailDetails emailDetails = EmailSupport.settingEmailDetails(
+                        user.getEmail(), OTP_REQUEST_SUBJECT);
                 emailService.sendMailOtpGeneration(emailDetails, user);
-                UserDTO updateUserDTO = userService.updateUserByUserId(userDTO.getUserId(), userDTO);
-                return eCommerceProperties.getUserOtpSentViaMail();
+
+                // Update OTP in the database
+                userRepository.updateOtpByUserId(user.getUserId(), randomSixDigit, System.currentTimeMillis());
+                return OTP_SENT_MESSAGE;
             }
             throw new ApplicationException(USER_NOT_AVAILABLE);
         } catch (DataAccessException e) {
             throw new ApplicationException(e.getMessage());
         }
     }
+
 }

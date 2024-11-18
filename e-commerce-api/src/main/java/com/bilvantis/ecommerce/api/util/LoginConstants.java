@@ -16,4 +16,7 @@ public class LoginConstants {
     public static final String LOG_UNEXPECTED_ERROR = "An unexpected error occurred: {}";
     public static final String INVALID_PHONE_NUMBER = "User invalid phone number";
     public static final String USER_NOT_AVAILABLE = "User not available";
+    public static final String OTP_REQUEST_SUBJECT = "Otp Request for E_Commerce website Login ";
+    public static final String OTP_SENT_MESSAGE = "One Time Password has been sent to your email successfully";
+    public static final String OTP_FORMAT = "%06d";
 }

@@ -1,4 +1,4 @@
-package com.bilvantis.ecommerce.app.services.model;
+package com.bilvantis.ecommerce.model;
 
 import com.bilvantis.ecommerce.api.exception.ErrorResponse;
 import lombok.Data;

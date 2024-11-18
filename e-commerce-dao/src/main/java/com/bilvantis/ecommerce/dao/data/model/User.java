@@ -18,26 +18,26 @@ import java.io.Serializable;
 public class User extends BaseEntity implements Serializable {
 
     @Id
-    @Column(name = "user_id", columnDefinition = "VARCHAR(36)")
+    @Column(name = "user_id", length = 36, nullable = false)
     private String userId;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", length = 150)
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name", length = 150)
     private String lastName;
 
-    @Column(name = "email")
+    @Column(name = "email", length = 100)
     private String email;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
     @Column(name = "gender")
     private String gender;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "user_type")
+    @Column(name = "user_type", nullable = false)
     private UserType userType;
 
     @Column(name = "address")
@@ -54,5 +54,4 @@ public class User extends BaseEntity implements Serializable {
 
     @Column(name = "otp_gen_time")
     private Long otpGenerationTime;
-
 }

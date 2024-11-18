@@ -1,9 +1,10 @@
-package com.bilvantis.ecommerce.app.services.controller.exception;
+package com.bilvantis.ecommerce.controller.exception;
 
 import com.bilvantis.ecommerce.api.exception.ApplicationException;
 import com.bilvantis.ecommerce.api.exception.ErrorResponse;
-import com.bilvantis.ecommerce.app.services.model.UserResponseDTO;
-import com.bilvantis.ecommerce.app.services.util.UserRequestResponseBuilder;
+import com.bilvantis.ecommerce.model.UserResponseDTO;
+import com.bilvantis.ecommerce.util.UserRequestResponseBuilder;
+import com.bilvantis.ecommerce.util.ECommerceAppConstant;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
@@ -21,8 +22,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
-import static com.bilvantis.ecommerce.app.services.util.ECommerceAppConstant.*;
-
 @ControllerAdvice
 public class ECommerceAppExceptionHandler {
 
@@ -34,11 +33,11 @@ public class ECommerceAppExceptionHandler {
      */
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<UserResponseDTO> handleApplicationException(ApplicationException exception) {
-        ErrorResponse errorResponse = new ErrorResponse(exception.getMessage(), GLOBAL_FIELD_ID);
+        ErrorResponse errorResponse = new ErrorResponse(exception.getMessage(), ECommerceAppConstant.GLOBAL_FIELD_ID);
         ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         List<ErrorResponse> errors = new ArrayList<>();
         errors.add(errorResponse);
-        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ERROR), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ECommerceAppConstant.ERROR), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -52,9 +51,9 @@ public class ECommerceAppExceptionHandler {
         BindingResult bindingResult = exception.getBindingResult();
         List<ErrorResponse> errors = new ArrayList<>();
         bindingResult.getFieldErrors().forEach(fieldError ->
-                errors.add(new ErrorResponse(fieldError.getDefaultMessage(), DEP_BADREQUEST_001))
+                errors.add(new ErrorResponse(fieldError.getDefaultMessage(), ECommerceAppConstant.DEP_BADREQUEST_001))
         );
-        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ERROR), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ECommerceAppConstant.ERROR), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -66,13 +65,13 @@ public class ECommerceAppExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<UserResponseDTO> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
         String message = exception.getMessage();
-        if (message.contains(USER_TYPE_DTO)) {
-            message = String.format(INVALID_ENUM_VALUE, USER_TYPE_DTO, ACCEPTED_USER_TYPE_VALUES);
+        if (message.contains(ECommerceAppConstant.USER_TYPE_DTO)) {
+            message = String.format(ECommerceAppConstant.INVALID_ENUM_VALUE, ECommerceAppConstant.USER_TYPE_DTO, ECommerceAppConstant.ACCEPTED_USER_TYPE_VALUES);
         }
-        ErrorResponse errorResponse = new ErrorResponse(message, GLOBAL_FIELD_ID);
+        ErrorResponse errorResponse = new ErrorResponse(message, ECommerceAppConstant.GLOBAL_FIELD_ID);
         List<ErrorResponse> errors = new ArrayList<>();
         errors.add(errorResponse);
-        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ERROR), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ECommerceAppConstant.ERROR), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -90,6 +89,6 @@ public class ECommerceAppExceptionHandler {
                     .reduce((first, second) -> second).orElse(null);
             errors.add(new ErrorResponse(constraintViolation.getMessage(), Objects.nonNull(lastNode) ? lastNode.getName() : null));
         });
-        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ERROR), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ECommerceAppConstant.ERROR), HttpStatus.BAD_REQUEST);
     }
 }

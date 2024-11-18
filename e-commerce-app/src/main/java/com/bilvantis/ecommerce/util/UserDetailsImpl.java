@@ -1,4 +1,4 @@
-package com.bilvantis.ecommerce.app.services.util;
+package com.bilvantis.ecommerce.util;
 
 import com.bilvantis.ecommerce.dao.data.model.User;
 import com.bilvantis.ecommerce.dao.util.UserType;

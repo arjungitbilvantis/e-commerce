@@ -2,6 +2,7 @@ package com.bilvantis.ecommerce.dao.data.repository;
 
 import com.bilvantis.ecommerce.dao.data.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -24,5 +25,12 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("SELECT u FROM User u WHERE u.isActive = true")
     List<User> findAllActiveUsers();
+
+    @Modifying
+    @Query("UPDATE User u SET u.otp = :otp, u.otpGenerationTime = :otpGenerationTime WHERE u.userId = :userId")
+    void updateOtpByUserId(@Param("userId") String userId, @Param("otp") String otp, @Param("otpGenerationTime") long otpGenerationTime);
+
+    @Query("SELECT u FROM User u WHERE u.userId = :userId AND u.isActive = true")
+    Optional<User> findByIdAndIsActive(@Param("userId") String userId);
 
 }

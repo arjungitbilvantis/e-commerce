@@ -1,4 +1,4 @@
-package com.bilvantis.ecommerce.app.services.config;
+package com.bilvantis.ecommerce.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +27,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login/**", "/login/one-time-password","/user").permitAll() // Permit these endpoints
+                        .requestMatchers("/login/**", "/login/one-time-password","/user/register").permitAll() // Permit these endpoints
                         .requestMatchers(HttpMethod.GET, "/user/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/user").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/user/**").authenticated()

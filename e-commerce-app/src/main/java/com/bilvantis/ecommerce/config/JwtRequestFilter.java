@@ -1,6 +1,7 @@
-package com.bilvantis.ecommerce.app.services.config;
+package com.bilvantis.ecommerce.config;
 
 import com.bilvantis.ecommerce.api.util.JwtUtil;
+import com.bilvantis.ecommerce.util.ECommerceAppConstant;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,8 +19,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import static com.bilvantis.ecommerce.app.services.util.ECommerceAppConstant.*;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -41,12 +40,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         }
 
-        final String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
+        final String authorizationHeader = request.getHeader(ECommerceAppConstant.AUTHORIZATION_HEADER);
 
         String phoneNumber = null;
         String jwt = null;
 
-        if (Objects.nonNull(authorizationHeader) && authorizationHeader.startsWith(BEARER_PREFIX)) {
+        if (Objects.nonNull(authorizationHeader) && authorizationHeader.startsWith(ECommerceAppConstant.BEARER_PREFIX)) {
             jwt = authorizationHeader.substring(7);
             phoneNumber = jwtUtil.extractUsername(jwt);
         }
@@ -63,11 +62,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             } catch (UsernameNotFoundException e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write(INVALID_OR_EXPIRED_TOKEN);
+                response.getWriter().write(ECommerceAppConstant.INVALID_OR_EXPIRED_TOKEN);
                 return;
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write(TOKEN_PROCESSING_ERROR);
+                response.getWriter().write(ECommerceAppConstant.TOKEN_PROCESSING_ERROR);
                 return;
             }
         }

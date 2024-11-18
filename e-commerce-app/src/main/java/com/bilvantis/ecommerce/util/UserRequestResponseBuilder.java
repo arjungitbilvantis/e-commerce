@@ -1,7 +1,7 @@
-package com.bilvantis.ecommerce.app.services.util;
+package com.bilvantis.ecommerce.util;
 
 import com.bilvantis.ecommerce.api.exception.ErrorResponse;
-import com.bilvantis.ecommerce.app.services.model.UserResponseDTO;
+import com.bilvantis.ecommerce.model.UserResponseDTO;
 
 import java.util.List;
 

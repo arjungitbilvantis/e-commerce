@@ -1,16 +1,20 @@
-package com.bilvantis.ecommerce.app.services.controller;
+package com.bilvantis.ecommerce.controller;
 
 import com.bilvantis.ecommerce.api.service.LoginService;
-import com.bilvantis.ecommerce.app.services.model.UserResponseDTO;
-import com.bilvantis.ecommerce.app.services.util.ECommerceAppConstant;
-import com.bilvantis.ecommerce.app.services.util.UserRequestResponseBuilder;
 import com.bilvantis.ecommerce.dto.model.UserDTO;
+import com.bilvantis.ecommerce.model.UserResponseDTO;
+import com.bilvantis.ecommerce.util.ECommerceAppConstant;
+import com.bilvantis.ecommerce.util.UserRequestResponseBuilder;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import static com.bilvantis.ecommerce.util.ECommerceAppConstant.AUTHORIZATION_HEADER;
+import static com.bilvantis.ecommerce.util.ECommerceAppConstant.BEARER_PREFIX;
 
 @RestController
 @RequestMapping(value = "/login")
@@ -34,7 +38,10 @@ public class LoginController {
      */
     @GetMapping
     public ResponseEntity<UserResponseDTO> verifyLoginDetails(@NotNull @RequestParam String phoneNumber, @NotNull @RequestParam String otp) {
-        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(loginService.verifyUserLogin(phoneNumber, otp), null, ECommerceAppConstant.SUCCESS), HttpStatus.OK);
+        String token = loginService.verifyUserLogin(phoneNumber, otp);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(AUTHORIZATION_HEADER, BEARER_PREFIX + token);
+        return new ResponseEntity<>(null, headers, HttpStatus.OK);
     }
 
     /**

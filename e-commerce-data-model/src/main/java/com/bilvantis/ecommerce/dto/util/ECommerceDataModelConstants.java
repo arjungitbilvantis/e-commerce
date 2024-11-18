@@ -24,9 +24,7 @@ public class ECommerceDataModelConstants {
     public static final String MESSAGE_ADDRESS_LENGTH = "Address must be between 10 and 255 characters";
     public static final int ADDRESS_MIN_LENGTH = 10;
     public static final int ADDRESS_MAX_LENGTH = 255;
-
-
-
-
+    public static final int NAME_MAX_LENGTH = 150;
+    public static final int EMAIL_MAX_LENGTH = 100;
 
 }

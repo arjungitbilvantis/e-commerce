@@ -1,9 +1,9 @@
-package com.bilvantis.ecommerce.app.services.controller;
+package com.bilvantis.ecommerce.controller;
 
 import com.bilvantis.ecommerce.api.service.UserService;
-import com.bilvantis.ecommerce.app.services.model.UserResponseDTO;
-import com.bilvantis.ecommerce.app.services.util.ECommerceAppConstant;
-import com.bilvantis.ecommerce.app.services.util.UserRequestResponseBuilder;
+import com.bilvantis.ecommerce.model.UserResponseDTO;
+import com.bilvantis.ecommerce.util.ECommerceAppConstant;
+import com.bilvantis.ecommerce.util.UserRequestResponseBuilder;
 import com.bilvantis.ecommerce.dto.model.UserDTO;
 import com.bilvantis.ecommerce.dto.util.OnCreate;
 import com.bilvantis.ecommerce.dto.util.OnUpdate;
@@ -37,7 +37,7 @@ public class UserController {
      * @return ResponseEntity containing the UserResponseDTO and HTTP status CREATED
      */
     @Validated(OnCreate.class)
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> createUser(@NotNull @Valid @RequestBody UserDTO userDTO) {
         return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(
                 userService.createUser(userDTO), null, ECommerceAppConstant.SUCCESS), HttpStatus.CREATED);
@@ -61,7 +61,7 @@ public class UserController {
      *
      * @return ResponseEntity containing a list of UserDTOs and HTTP status OK
      */
-    @GetMapping
+    @GetMapping("/users")
     public ResponseEntity<UserResponseDTO> getAllUsers() {
         List<UserDTO> userDTOList = userService.getAllUsers();
         return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(

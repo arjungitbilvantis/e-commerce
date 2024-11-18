@@ -1,4 +1,4 @@
-package com.bilvantis.ecommerce.app.services.util;
+package com.bilvantis.ecommerce.util;
 
 public class ECommerceAppConstant {
 

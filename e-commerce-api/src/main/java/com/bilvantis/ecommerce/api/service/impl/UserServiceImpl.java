@@ -19,7 +19,6 @@ import static com.bilvantis.ecommerce.api.util.UserSupport.*;
 @Service("userServiceImpl")
 public class UserServiceImpl implements UserService<UserDTO, UUID> {
 
-
     private final UserRepository userRepository;
 
     private final EmailService emailService;
@@ -61,6 +60,7 @@ public class UserServiceImpl implements UserService<UserDTO, UUID> {
             user.setOtp(otp);
 
             // Save the user entity
+            user.setFirstTimeUser(Boolean.TRUE);
             User savedUser = userRepository.save(user);
 
             // Send verification email
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService<UserDTO, UUID> {
 
             return convertUserEntityToUserDTO(savedUser);
         } catch (DataAccessException e) {
-            throw new ApplicationException(USER_SAVE_FAILED);
+            throw new ApplicationException(e.getMessage());
         }
     }
 
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService<UserDTO, UUID> {
     public UserDTO getUserByUserId(String uuid) {
         try {
             // Look up the user by UUID
-            Optional<User> userOptional = userRepository.findById(uuid);
+            Optional<User> userOptional = userRepository.findByIdAndIsActive(uuid);
 
             if (userOptional.isPresent()) {
                 // Convert entity to DTO and return it

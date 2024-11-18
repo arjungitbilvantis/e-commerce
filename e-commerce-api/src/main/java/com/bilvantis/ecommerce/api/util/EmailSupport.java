@@ -20,8 +20,8 @@ public class EmailSupport {
         } catch (MessagingException e) {
             throw new ApplicationException(e);
         }
-
     }
+
 
     public static EmailDetails settingEmailDetails(String mailId, String subject) {
         EmailDetails emailDetails = new EmailDetails();
