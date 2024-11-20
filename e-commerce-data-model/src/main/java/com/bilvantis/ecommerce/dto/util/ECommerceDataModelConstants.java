@@ -28,5 +28,14 @@ public class ECommerceDataModelConstants {
     public static final int ADDRESS_MAX_LENGTH = 255;
     public static final int NAME_MAX_LENGTH = 150;
     public static final int EMAIL_MAX_LENGTH = 100;
-
+    public static final String MESSAGE_PRODUCT_NAME = "Product name is required and must not be blank.";
+    public static final String DESCRIPTION_PRODUCT_LENGTH_MESSAGE = "Product description must not exceed 500 characters.";
+    public static final String URL_LENGTH_MESSAGE = "Image URL must not exceed 255 characters.";
+    public static final String MESSAGE_PRICE_REQUIRED = "Price is required and must not be null.";
+    public static final String MESSAGE_PRICE_MIN = "Price must be greater than zero.";
+    public static final String MESSAGE_CATEGORY_REQUIRED = "Category is required and must not be null.";
+    public static final String MESSAGE_SUB_CATEGORY_REQUIRED = "Sub-Category is required and must not be null.";
+    public static final int PRODUCT_DESCRIPTION = 500;
+    public static final int URL_LENGTH = 255;
+    public static final String MIN_PRICE = "0.0";
 }
