@@ -62,4 +62,5 @@ public class UserDetailsImpl implements UserDetails {
         // You can implement actual logic for enabling/disabling the account if needed
         return true;
     }
+    
 }
