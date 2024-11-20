@@ -52,5 +52,35 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    /**
+     * Sends a low-stock alert email to an administrator.
+     *
+     * @param emailDetails EmailDetails containing recipient and subject details.
+     * @param productId    ID of the product with low stock.
+     * @param availableItems Current stock quantity of the product.
+     */
+    @Override
+    public void sendLowStockAlert(EmailDetails emailDetails, String productId, int availableItems) {
+        try {
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = settingMimeMessageHelper(emailDetails, mimeMessage, SENDER_EMAIL);
+
+            // Load the low-stock email template
+            ClassPathResource emailTemplateResource = new ClassPathResource(LOW_STOCK_EMAIL_TEMPLATE_PATH);
+            String emailTemplateContent = new String(FileCopyUtils.copyToByteArray(emailTemplateResource.getInputStream()), StandardCharsets.UTF_8);
+
+            // Replace placeholders with product-specific details
+            emailTemplateContent = emailTemplateContent.replace(PRODUCT_ID_PLACEHOLDER, productId);
+            emailTemplateContent = emailTemplateContent.replace(AVAILABLE_ITEMS_PLACEHOLDER, String.valueOf(availableItems));
+
+            messageHelper.setText(emailTemplateContent, true);
+            javaMailSender.send(mimeMessage);
+
+        } catch (Exception e) {
+            throw new ApplicationException("Failed to send low-stock alert email: " + e.getMessage());
+        }
+    }
+
+
 
 }

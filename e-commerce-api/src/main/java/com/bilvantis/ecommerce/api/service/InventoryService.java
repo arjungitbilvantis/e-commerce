@@ -11,4 +11,5 @@ public interface InventoryService<I extends InventoryDTO, ID extends Serializabl
     I getInventoryByProductId(String productId);
 
     List<I> getAllInventories();
+    void monitorLowStockItems();
 }
