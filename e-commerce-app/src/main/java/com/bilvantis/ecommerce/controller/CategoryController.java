@@ -3,6 +3,7 @@ package com.bilvantis.ecommerce.controller;
 
 import com.bilvantis.ecommerce.api.service.CategoryService;
 import com.bilvantis.ecommerce.dto.model.CategoryDTO;
+import com.bilvantis.ecommerce.dto.util.OnCreate;
 import com.bilvantis.ecommerce.model.UserResponseDTO;
 import com.bilvantis.ecommerce.util.ECommerceAppConstant;
 import com.bilvantis.ecommerce.util.UserRequestResponseBuilder;
@@ -34,6 +35,7 @@ public class CategoryController {
      * @return a ResponseEntity containing the created CategoryDTO and HTTP status code 201 (Created)
      */
     @PostMapping
+    @Validated(OnCreate.class)
     public ResponseEntity<UserResponseDTO> createCategory(@NotNull @Valid @RequestBody CategoryDTO categoryDTO) {
         return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(
                 categoryService.createCategory(categoryDTO), null, ECommerceAppConstant.SUCCESS), HttpStatus.CREATED);

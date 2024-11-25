@@ -29,6 +29,11 @@ public class CategoryServiceImpl implements CategoryService<CategoryDTO, UUID> {
     @Transactional
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
         Category category = convertCategoryDTOToCategoryEntity(categoryDTO);
+
+        // Generate a random UUID for categoryId before saving
+        UUID generatedCategoryId = UUID.randomUUID();
+        category.setCategoryId(generatedCategoryId.toString());
+
         categoryRepository.save(category);
         return convertCategoryEntityToCategoryDTO(category);
     }
