@@ -343,6 +343,6 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
             throw new ApplicationException(String.format(INVENTORY_NOT_FOUND, updatedProduct.getProductId()));
         }
     }
-    
+
 }
 
