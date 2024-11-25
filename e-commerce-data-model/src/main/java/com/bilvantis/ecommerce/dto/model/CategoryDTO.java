@@ -8,14 +8,16 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+import static com.bilvantis.ecommerce.dto.util.ECommerceDataModelConstants.*;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryDTO extends BaseDTO implements Serializable {
     private String categoryId;
 
-    @NotBlank(message = "Category name is required.")
-    @Size(max = 150, message = "Category name must not exceed 150 characters.")
+    @NotBlank(message = CATEGORY_NAME_REQUIRED_MESSAGE)
+    @Size(max = NAME_MAX_LENGTH, message = CATEGORY_NAME_LENGTH_MESSAGE)
     private String categoryName;
 
     private String parentCategoryId;

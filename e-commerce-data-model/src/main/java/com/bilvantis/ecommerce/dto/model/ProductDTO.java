@@ -18,7 +18,7 @@ import static com.bilvantis.ecommerce.dto.util.ECommerceDataModelConstants.*;
 public class ProductDTO extends BaseDTO implements Serializable {
 
     @Null(groups = OnCreate.class, message = MESSAGE_ID_ON_CREATE)
-    @NotNull(groups = OnUpdate.class, message = MESSAGE_ID_ON_UPDATE)
+    @NotBlank(groups = OnUpdate.class, message = MESSAGE_ID_ON_UPDATE)
     private String productId;
 
     @NotBlank(message = MESSAGE_PRODUCT_NAME)

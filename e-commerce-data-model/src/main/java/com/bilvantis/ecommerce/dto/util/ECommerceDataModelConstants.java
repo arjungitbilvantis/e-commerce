@@ -38,4 +38,6 @@ public class ECommerceDataModelConstants {
     public static final int PRODUCT_DESCRIPTION = 500;
     public static final int URL_LENGTH = 255;
     public static final String MIN_PRICE = "0.0";
+    public static final String CATEGORY_NAME_REQUIRED_MESSAGE = "Category name is required.";
+    public static final String CATEGORY_NAME_LENGTH_MESSAGE = "Category name must not exceed 150 characters.";
 }

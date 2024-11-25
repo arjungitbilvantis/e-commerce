@@ -9,6 +9,7 @@ import com.bilvantis.ecommerce.dao.data.model.Product;
 import com.bilvantis.ecommerce.dao.data.repository.CategoryRepository;
 import com.bilvantis.ecommerce.dao.data.repository.InventoryRepository;
 import com.bilvantis.ecommerce.dao.data.repository.ProductRepository;
+import com.bilvantis.ecommerce.dto.model.CategoryDTO;
 import com.bilvantis.ecommerce.dto.model.ProductDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataAccessException;
@@ -55,37 +56,11 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
             UUID generatedProductId = UUID.randomUUID();
             product.setProductId(generatedProductId.toString());
 
-            // Check if the category_id exists
-            if (Objects.nonNull(product.getCategory()) && Objects.nonNull(product.getCategory().getCategoryId())) {
-                Optional<Category> existingCategory = categoryRepository.findById(product.getCategory().getCategoryId());
+            // Validate and set category
+            setCategory(product, productDTO);
 
-                if (existingCategory.isPresent()) {
-                    // Update the existing category with the values from the DTO
-                    Category category = existingCategory.get();
-                    category.setCategoryName(productDTO.getCategory().getCategoryName());
-                    product.setCategory(category);
-                } else {
-                    throw new ApplicationException(CATEGORY_NOT_FOUND + product.getCategory().getCategoryId());
-                }
-            } else {
-                throw new ApplicationException(CATEGORY_ID_MISSING);
-            }
-
-            // Check if the sub_category_id exists
-            if (Objects.nonNull(product.getSubCategory()) && Objects.nonNull(product.getSubCategory().getCategoryId())) {
-                Optional<Category> existingSubCategory = categoryRepository.findById(product.getSubCategory().getCategoryId());
-
-                if (existingSubCategory.isPresent()) {
-                    // Update the existing sub-category with the values from the DTO
-                    Category subCategory = existingSubCategory.get();
-                    subCategory.setCategoryName(productDTO.getSubCategory().getCategoryName());
-                    product.setSubCategory(subCategory);
-                } else {
-                    throw new ApplicationException(SUBCATEGORY_NOT_FOUND + product.getSubCategory().getCategoryId());
-                }
-            } else {
-                throw new ApplicationException(SUBCATEGORY_ID_MISSING);
-            }
+            // Validate and set sub-category
+            setSubCategory(product, productDTO);
 
             // Save the product entity
             Product savedProduct = productRepository.save(product);
@@ -100,6 +75,51 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
         }
     }
 
+    /**
+     * Retrieves and updates the category based on the provided CategoryDTO.
+     *
+     * @param categoryDTO the data transfer object containing category details
+     * @return the updated Category entity
+     * @throws ApplicationException if the category ID is missing or the category is not found
+     */
+    private Category getCategory(CategoryDTO categoryDTO) {
+        if (Objects.nonNull(categoryDTO) && Objects.nonNull(categoryDTO.getCategoryId())) {
+            Optional<Category> existingCategory = categoryRepository.findById(categoryDTO.getCategoryId());
+
+            if (existingCategory.isPresent()) {
+                // Update the existing category with the values from the DTO
+                Category category = existingCategory.get();
+                category.setCategoryName(categoryDTO.getCategoryName());
+                return category;
+            } else {
+                throw new ApplicationException(String.format(CATEGORY_NOT_FOUND, categoryDTO.getCategoryId()));
+            }
+        } else {
+            throw new ApplicationException(CATEGORY_ID_MISSING);
+        }
+    }
+
+    /**
+     * Sets the category for the given product based on the provided ProductDTO.
+     *
+     * @param product    the product entity to set the category for
+     * @param productDTO the data transfer object containing product details
+     * @throws ApplicationException if the category ID is missing or the category is not found
+     */
+    private void setCategory(Product product, ProductDTO productDTO) {
+        product.setCategory(getCategory(productDTO.getCategory()));
+    }
+
+    /**
+     * Sets the sub-category for the given product based on the provided ProductDTO.
+     *
+     * @param product    the product entity to set the sub-category for
+     * @param productDTO the data transfer object containing product details
+     * @throws ApplicationException if the sub-category ID is missing or the sub-category is not found
+     */
+    private void setSubCategory(Product product, ProductDTO productDTO) {
+        product.setSubCategory(getCategory(productDTO.getSubCategory()));
+    }
 
     /**
      * Retrieves a product by its ID.
@@ -323,7 +343,6 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
             throw new ApplicationException(String.format(INVENTORY_NOT_FOUND, updatedProduct.getProductId()));
         }
     }
-
-
+    
 }
 
