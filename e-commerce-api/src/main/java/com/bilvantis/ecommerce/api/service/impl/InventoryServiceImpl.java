@@ -120,6 +120,12 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
                 });
     }
 
+    /**
+     * Rolls back the stock levels for the items in the given order.
+     *
+     * @param order the order containing the items to roll back
+     * @return {@code true} if all stock updates were successful, {@code false} otherwise
+     */
     @Override
     public Boolean rollbackStock(Order order) {
         // Loop through all items in the order and update stock levels
@@ -151,7 +157,6 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
         }
         return true; // If all stock updates were successful
     }
-
 
 
 }

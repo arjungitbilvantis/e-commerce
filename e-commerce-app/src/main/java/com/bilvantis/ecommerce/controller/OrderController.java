@@ -67,17 +67,4 @@ public class OrderController {
                 orderDetails, null, ECommerceAppConstant.SUCCESS));
     }
 
-    /**
-     * Checks for pending orders older than 1 day and marks them as failed.
-     *
-     * @return a success message
-     */
-    @PostMapping("/checkPendingOrders")
-    public ResponseEntity<UserResponseDTO> checkPendingOrdersAndMarkFailed() {
-        orderService.checkPendingOrdersAndMarkFailed();
-        return ResponseEntity.ok(UserRequestResponseBuilder.buildResponseDTO(
-                null, null, "Pending orders check completed successfully."));
-    }
-
-
 }

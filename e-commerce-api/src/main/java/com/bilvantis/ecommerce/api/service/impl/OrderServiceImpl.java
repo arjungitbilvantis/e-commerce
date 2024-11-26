@@ -17,11 +17,12 @@ import com.bilvantis.ecommerce.dto.model.OrderDTO;
 import com.bilvantis.ecommerce.dto.model.OrderItemDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataAccessException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,12 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
         }
     }
 
+    /**
+     * Saves the order items associated with a given order.
+     *
+     * @param savedOrder the order to which the items belong
+     * @param items      the list of {@code OrderItemDTO} objects to be saved
+     */
     private void saveOrderItems(Order savedOrder, List<OrderItemDTO> items) {
         for (OrderItemDTO itemDTO : items) {
             OrderItem orderItem = new OrderItem();
@@ -192,24 +199,35 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
     }
 
     /**
-     * Checks for pending orders older than 1 day and marks them as failed.
+     * Scheduled task that checks for pending orders and marks them as failed if they were created more than one day ago.
      *
-     * @throws ApplicationException if the operation fails
+     * @throws ApplicationException if there is an issue accessing the data
      */
     @Transactional
     @Override
+    @Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
     public void checkPendingOrdersAndMarkFailed() {
         try {
+            // Get all orders that are currently pending
             List<Order> pendingOrders = orderRepository.findByStatus(ORDER_STATUS_PENDING);
 
+            // Iterate through each pending order
             pendingOrders.forEach(order -> {
-                if (ChronoUnit.DAYS.between((Temporal) order.getCreatedDate(), LocalDateTime.now()) > 1) {
+                // Convert the createdDate (Date) to LocalDateTime
+                LocalDateTime createdDateTime = order.getCreatedDate().toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
+
+                // Check if the order was created more than 1 day ago
+                if (ChronoUnit.DAYS.between(createdDateTime, LocalDateTime.now()) > 1) {
+                    // Mark the order as failed
                     order.setStatus(ORDER_STATUS_FAILED);
-                    orderRepository.save(order);
+                    orderRepository.save(order);  // Save the updated order
                 }
             });
         } catch (DataAccessException e) {
             throw new ApplicationException(PENDING_ORDERS_CHECK_FAILED, e);
         }
     }
+
 }
