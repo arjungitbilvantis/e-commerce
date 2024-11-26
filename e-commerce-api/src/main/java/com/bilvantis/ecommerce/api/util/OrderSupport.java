@@ -1,9 +1,13 @@
 package com.bilvantis.ecommerce.api.util;
 
 import com.bilvantis.ecommerce.dao.data.model.Order;
+import com.bilvantis.ecommerce.dao.data.model.OrderItem;
 import com.bilvantis.ecommerce.dto.model.OrderDTO;
+import com.bilvantis.ecommerce.dto.model.OrderItemDTO;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class OrderSupport {
 
@@ -15,19 +19,48 @@ public class OrderSupport {
      */
     public static OrderDTO convertOrderEntityToOrderDTO(Order order) {
         if (Objects.isNull(order)) {
-            return null;
+            return null; // Return null if the Order entity is null
         }
+
+        // Create a new OrderDTO and map the fields from the Order entity
         OrderDTO orderDTO = new OrderDTO();
+
         orderDTO.setOrderId(order.getOrderId());
         orderDTO.setUserId(order.getUserId());
         orderDTO.setStatus(order.getStatus());
         orderDTO.setPaymentStatus(order.getPaymentStatus());
         orderDTO.setIsActive(order.getIsActive());
-        orderDTO.setCreatedBy(order.getCreatedBy());
-        orderDTO.setCreatedDate(order.getCreatedDate());
-        orderDTO.setUpdatedBy(order.getUpdatedBy());
-        orderDTO.setUpdatedDate(order.getUpdatedDate());
+
+        // Convert OrderItems from Order to OrderItemDTO list
+        List<OrderItemDTO> orderItemDTOList = order.getItems().stream()
+                .map(OrderSupport::convertOrderItemEntityToDTO) // Assuming a helper method for converting OrderItem
+                .collect(Collectors.toList());
+
+        orderDTO.setItems(orderItemDTOList); // Set the items in the OrderDTO
+
+        // Return the populated OrderDTO
         return orderDTO;
+    }
+
+    /**
+     * Helper method to convert an OrderItem entity to an OrderItemDTO.
+     *
+     * @param orderItem The OrderItem entity to convert.
+     * @return The corresponding OrderItemDTO.
+     */
+    private static OrderItemDTO convertOrderItemEntityToDTO(OrderItem orderItem) {
+        if (Objects.isNull(orderItem)) {
+            return null; // Return null if the OrderItem entity is null
+        }
+
+        // Create and populate the OrderItemDTO
+        OrderItemDTO orderItemDTO = new OrderItemDTO();
+        orderItemDTO.setOrderItemId(orderItem.getOrderItemId());
+        orderItemDTO.setOrderId(orderItem.getOrder().getOrderId());
+        orderItemDTO.setProductId(orderItem.getProductId());
+        orderItemDTO.setQuantity(orderItem.getQuantity());
+
+        return orderItemDTO;
     }
 
     /**
