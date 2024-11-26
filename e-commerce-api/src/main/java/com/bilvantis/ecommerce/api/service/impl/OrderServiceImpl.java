@@ -91,12 +91,10 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
             // Reserve stock
             inventoryService.reserveStock(itemsMap);
 
-            // Create the order
-            Order order = convertOrderDTOToOrderEntity(orderDTO);
-            order.setOrderId(UUID.randomUUID().toString());
-            order.setStatus(ORDER_STATUS_PENDING);
-            order.setCreatedDate(new Date());
-            order.setUserId(user.getUserId());
+            // Create the order and set its properties
+            Order order = createNewOrder(orderDTO, user);
+
+            // Save the order
             Order savedOrder = orderRepository.save(order);
 
             // Save each order item to the order_items table
@@ -108,6 +106,17 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
         }
     }
 
+    /**
+     * Helper method to create a new Order and set its properties.
+     */
+    private Order createNewOrder(OrderDTO orderDTO, User user) {
+        Order order = convertOrderDTOToOrderEntity(orderDTO);
+        order.setOrderId(UUID.randomUUID().toString());
+        order.setStatus(ORDER_STATUS_PENDING);
+        order.setCreatedDate(new Date());
+        order.setUserId(user.getUserId());
+        return order;
+    }
     /**
      * Saves the order items associated with a given order.
      *

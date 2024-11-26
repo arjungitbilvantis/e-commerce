@@ -17,12 +17,12 @@ public enum OrderStatus {
     }
 
     // Optionally, you can add a method to check if a status is valid
-    public static boolean isValidStatus(String status) {
+    public static Boolean isValidStatus(String status) {
         for (OrderStatus orderStatus : values()) {
             if (orderStatus.getStatus().equals(status)) {
-                return true;
+                return Boolean.TRUE;
             }
         }
-        return false;
+        return Boolean.FALSE;
     }
 }
