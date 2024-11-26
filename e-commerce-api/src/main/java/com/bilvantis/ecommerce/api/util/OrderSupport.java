@@ -5,8 +5,10 @@ import com.bilvantis.ecommerce.dao.data.model.OrderItem;
 import com.bilvantis.ecommerce.dto.model.OrderDTO;
 import com.bilvantis.ecommerce.dto.model.OrderItemDTO;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class OrderSupport {
@@ -31,9 +33,11 @@ public class OrderSupport {
         orderDTO.setPaymentStatus(order.getPaymentStatus());
         orderDTO.setIsActive(order.getIsActive());
 
-        // Convert OrderItems from Order to OrderItemDTO list
-        List<OrderItemDTO> orderItemDTOList = order.getItems().stream()
-                .map(OrderSupport::convertOrderItemEntityToDTO) // Assuming a helper method for converting OrderItem
+        // Handle null items list by initializing as an empty list if needed
+        List<OrderItemDTO> orderItemDTOList = Optional.ofNullable(order.getItems())
+                .orElse(Collections.emptyList())  // If items is null, return an empty list
+                .stream()
+                .map(OrderSupport::convertOrderItemEntityToDTO)  // Assuming a helper method for converting OrderItem
                 .collect(Collectors.toList());
 
         orderDTO.setItems(orderItemDTOList); // Set the items in the OrderDTO
@@ -41,6 +45,7 @@ public class OrderSupport {
         // Return the populated OrderDTO
         return orderDTO;
     }
+
 
     /**
      * Helper method to convert an OrderItem entity to an OrderItemDTO.

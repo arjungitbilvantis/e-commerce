@@ -24,10 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.bilvantis.ecommerce.api.util.OrderConstants.*;
@@ -114,7 +111,7 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
      */
     private Order createNewOrder(OrderDTO orderDTO, User user) {
         Order order = convertOrderDTOToOrderEntity(orderDTO);
-        order.setOrderId(UUID.randomUUID().toString());
+        Objects.requireNonNull(order).setOrderId(UUID.randomUUID().toString());
         order.setStatus(ORDER_STATUS_PENDING);
         order.setCreatedDate(new Date());
         order.setUserId(user.getUserId());
@@ -174,7 +171,7 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
 
             // If the status is "FAILED" or any other status, you might want to handle stock rollback or additional actions
             if (OrderStatus.FAILED.getStatus().equals(status)) {
-                // Rollback stock if order failed, you can also add logic to handle other actions based on business rules
+                // Rollback stock if order failed
                 inventoryService.rollbackStock(order);
             }
 
