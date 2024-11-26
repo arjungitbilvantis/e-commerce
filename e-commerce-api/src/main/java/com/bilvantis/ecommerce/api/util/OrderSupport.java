@@ -19,7 +19,7 @@ public class OrderSupport {
      */
     public static OrderDTO convertOrderEntityToOrderDTO(Order order) {
         if (Objects.isNull(order)) {
-            return null; // Return null if the Order entity is null
+            return null;
         }
 
         // Create a new OrderDTO and map the fields from the Order entity

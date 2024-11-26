@@ -12,6 +12,7 @@ import com.bilvantis.ecommerce.dao.data.repository.ProductRepository;
 import com.bilvantis.ecommerce.dto.model.CategoryDTO;
 import com.bilvantis.ecommerce.dto.model.ProductDTO;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import static com.bilvantis.ecommerce.api.util.ProductConstants.*;
 import static com.bilvantis.ecommerce.api.util.ProductSupport.*;
 
 @Service("productServiceImpl")
+@Slf4j
 public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
 
     private final ProductRepository productRepository;
@@ -71,6 +73,7 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
             // Convert and return the saved product entity to DTO
             return convertProductEntityToProductDTO(savedProduct);
         } catch (DataAccessException e) {
+            log.error(ERROR_SAVING_PRODUCT, productDTO.getProductId(), e.getMessage(), e);
             throw new ApplicationException(PRODUCT_SAVE_FAILED);
         }
     }
@@ -141,6 +144,7 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
                 throw new ApplicationException(String.format(PRODUCT_NOT_FOUND, productId));
             }
         } catch (DataAccessException e) {
+            log.error(ERROR_FETCHING_PRODUCT, productId, e.getMessage(), e);
             throw new ApplicationException(PRODUCT_FETCH_FAILED);
         }
     }
@@ -165,6 +169,7 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
             // Convert the list of entities to a list of DTOs
             return convertProductEntityToProductDTOList(products);
         } catch (DataAccessException e) {
+            log.error(ERROR_FETCHING_PRODUCTS, e.getMessage(), e);
             throw new ApplicationException(PRODUCTS_FETCH_FAILED);
         }
     }
@@ -242,6 +247,7 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
             return convertProductEntityToProductDTO(updatedProduct);
 
         } catch (DataAccessException e) {
+            log.error(ERROR_MESSAGE_UPDATING_PRODUCT, productId, e.getMessage(), e);
             throw new ApplicationException(String.format(ERROR_UPDATING_PRODUCT, productId));
         }
     }
@@ -281,6 +287,7 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
                 inventoryRepository.save(inventory);
             }
         } catch (DataAccessException e) {
+            log.error(ERROR_MESSAGE_DELETING_PRODUCT, productId, e.getMessage(), e);
             throw new ApplicationException(String.format(ERROR_DELETING_PRODUCT, productId));
         }
     }

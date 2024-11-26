@@ -16,6 +16,7 @@ import com.bilvantis.ecommerce.dto.model.InventoryDTO;
 import com.bilvantis.ecommerce.dto.model.OrderDTO;
 import com.bilvantis.ecommerce.dto.model.OrderItemDTO;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ import static com.bilvantis.ecommerce.api.util.ProductConstants.PRODUCT_NOT_FOUN
 import static com.bilvantis.ecommerce.api.util.UserConstants.USER_NOT_FOUND;
 
 @Service("orderServiceImpl")
+@Slf4j
 public class OrderServiceImpl implements OrderService<OrderDTO, String> {
 
     private final OrderRepository orderRepository;
@@ -102,6 +104,7 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
 
             return convertOrderEntityToOrderDTO(savedOrder);
         } catch (DataAccessException e) {
+            log.error(ERROR_CREATING_ORDER, orderDTO.getUserId(), e.getMessage(), e);
             throw new ApplicationException(ORDER_CREATION_FAILED, e);
         }
     }
@@ -117,6 +120,7 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
         order.setUserId(user.getUserId());
         return order;
     }
+
     /**
      * Saves the order items associated with a given order.
      *
@@ -126,11 +130,11 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
     private void saveOrderItems(Order savedOrder, List<OrderItemDTO> items) {
         for (OrderItemDTO itemDTO : items) {
             OrderItem orderItem = new OrderItem();
-            orderItem.setOrderItemId(UUID.randomUUID().toString());  // Generate a unique ID for the order item
-            orderItem.setOrder(savedOrder);  // Link the order to this order item
-            orderItem.setProductId(itemDTO.getProductId());  // Set the product ID
-            orderItem.setQuantity(itemDTO.getQuantity());  // Set the quantity
-            orderItemRepository.save(orderItem);  // Save the order item to the database
+            orderItem.setOrderItemId(UUID.randomUUID().toString());
+            orderItem.setOrder(savedOrder);
+            orderItem.setProductId(itemDTO.getProductId());
+            orderItem.setQuantity(itemDTO.getQuantity());
+            orderItemRepository.save(orderItem);
         }
     }
 
@@ -157,7 +161,7 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
                     .orElseThrow(() -> new ApplicationException(String.format(ORDER_NOT_FOUND, orderId)));
 
             // Fetch the associated user to validate their existence
-            User user = userRepository.findById(order.getUserId())
+            userRepository.findById(order.getUserId())
                     .orElseThrow(() -> new ApplicationException(String.format(USER_NOT_FOUND, order.getUserId())));
 
             // If the status is "CONFIRMED", check payment status
@@ -183,6 +187,7 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
             // Return the updated order as a DTO
             return convertOrderEntityToOrderDTO(order);
         } catch (DataAccessException e) {
+            log.error(ERROR_UPDATING_ORDER, orderId, e.getMessage(), e);
             throw new ApplicationException(String.format(ORDER_UPDATE_FAILED, orderId), e);
         }
     }
@@ -203,6 +208,7 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
 
             return convertOrderEntityToOrderDTO(order);
         } catch (DataAccessException e) {
+            log.error(ERROR_FETCHING_ORDER, orderId, e.getMessage(), e);
             throw new ApplicationException(String.format(ORDER_FETCH_FAILED, orderId), e);
         }
     }
@@ -216,27 +222,34 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
     @Override
     @Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
     public void checkPendingOrdersAndMarkFailed() {
+
         try {
             // Get all orders that are currently pending
             List<Order> pendingOrders = orderRepository.findByStatus(ORDER_STATUS_PENDING);
 
             // Iterate through each pending order
             pendingOrders.forEach(order -> {
-                // Convert the createdDate (Date) to LocalDateTime
-                LocalDateTime createdDateTime = order.getCreatedDate().toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime();
+                try {
+                    // Convert the createdDate (Date) to LocalDateTime
+                    LocalDateTime createdDateTime = order.getCreatedDate().toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime();
 
-                // Check if the order was created more than 1 day ago
-                if (ChronoUnit.DAYS.between(createdDateTime, LocalDateTime.now()) > 1) {
-                    // Mark the order as failed
-                    order.setStatus(ORDER_STATUS_FAILED);
-                    orderRepository.save(order);  // Save the updated order
+                    // Check if the order was created more than 1 day ago
+                    if (ChronoUnit.DAYS.between(createdDateTime, LocalDateTime.now()) > 1) {
+                        // Mark the order as failed
+                        order.setStatus(ORDER_STATUS_FAILED);
+                        orderRepository.save(order);  // Save the updated order
+                    }
+                } catch (Exception e) {
+                    log.error(ERROR_PENDING_ORDERS_UPDATE_FAILED, order.getOrderId(), e);
                 }
             });
         } catch (DataAccessException e) {
-            throw new ApplicationException(PENDING_ORDERS_CHECK_FAILED, e);
+            log.error(ERROR_PENDING_ORDERS_CHECK, e);
+            throw new ApplicationException(ERROR_PENDING_ORDERS_CHECK_FAILED, e);
         }
+
     }
 
 }
