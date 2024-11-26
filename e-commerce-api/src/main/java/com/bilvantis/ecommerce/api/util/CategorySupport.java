@@ -73,7 +73,7 @@ public class CategorySupport {
             parentCategory.setCategoryId(categoryDTO.getParentCategoryId());
             existingCategory.setParentCategory(parentCategory);
         } else {
-            existingCategory.setParentCategory(null); // Clear parent category if null
+            existingCategory.setParentCategory(null);
         }
 
         // Update audit fields

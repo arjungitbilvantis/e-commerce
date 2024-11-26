@@ -6,12 +6,15 @@ import com.bilvantis.ecommerce.dto.util.OnCreate;
 import com.bilvantis.ecommerce.model.UserResponseDTO;
 import com.bilvantis.ecommerce.util.ECommerceAppConstant;
 import com.bilvantis.ecommerce.util.UserRequestResponseBuilder;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/order")
 public class OrderController {
 
@@ -22,9 +25,15 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    /**
+     * Creates a new order based on the provided OrderDTO.
+     *
+     * @param orderDTO the OrderDTO object containing the order data
+     * @return a ResponseEntity containing the created OrderDTO and HTTP status code 201 (Created)
+     */
     @Validated(OnCreate.class)
     @PostMapping
-    public ResponseEntity<UserResponseDTO> createOrder(@RequestBody OrderDTO orderDTO) {
+    public ResponseEntity<UserResponseDTO> createOrder(@NotNull @Valid @RequestBody OrderDTO orderDTO) {
         return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(
                 orderService.createOrder(orderDTO), null, ECommerceAppConstant.SUCCESS),
                 HttpStatus.CREATED);

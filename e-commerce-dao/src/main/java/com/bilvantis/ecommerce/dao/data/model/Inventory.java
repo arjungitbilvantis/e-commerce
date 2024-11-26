@@ -31,4 +31,7 @@ public class Inventory extends BaseEntity implements Serializable {
 
     @Column(name = "lower_threshold")
     private Integer lowerThreshold;
+
+    @Column(name = "reserved_items")
+    private Integer reservedItems;
 }

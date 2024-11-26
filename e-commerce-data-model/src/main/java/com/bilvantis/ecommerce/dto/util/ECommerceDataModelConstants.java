@@ -40,4 +40,12 @@ public class ECommerceDataModelConstants {
     public static final String MIN_PRICE = "0.0";
     public static final String CATEGORY_NAME_REQUIRED_MESSAGE = "Category name is required.";
     public static final String CATEGORY_NAME_LENGTH_MESSAGE = "Category name must not exceed 150 characters.";
+    public static final String MESSAGE_USER_ID = "UserId is required and must not be blank.";
+    public static final String ORDER_STATUS_NOT_BLANK = "Order status cannot be null or empty";
+    public static final String PAYMENT_STATUS_NOT_BLANK = "Payment status cannot be null or empty";
+    public static final String ORDER_ITEMS_NOT_NULL = "Order items cannot be null on update";
+    public static final String ORDER_ITEMS_SIZE_MIN = "At least one item is required in the order";
+    public static final String MESSAGE_ORDER_ID = "OrderId is required and must not be blank.";
+    public static final String MESSAGE_PRODUCT_ID = "ProductId is required and must not be blank.";
+    public static final int ONE = 1;
 }

@@ -17,20 +17,16 @@ public class OrderSupport {
         if (Objects.isNull(order)) {
             return null;
         }
-
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setOrderId(order.getOrderId());
         orderDTO.setUserId(order.getUserId());
         orderDTO.setStatus(order.getStatus());
         orderDTO.setPaymentStatus(order.getPaymentStatus());
-
-        // Populate fields from BaseEntity if applicable
         orderDTO.setIsActive(order.getIsActive());
         orderDTO.setCreatedBy(order.getCreatedBy());
         orderDTO.setCreatedDate(order.getCreatedDate());
         orderDTO.setUpdatedBy(order.getUpdatedBy());
         orderDTO.setUpdatedDate(order.getUpdatedDate());
-
         return orderDTO;
     }
 
@@ -44,20 +40,16 @@ public class OrderSupport {
         if (Objects.isNull(orderDTO)) {
             return null;
         }
-
         Order order = new Order();
         order.setOrderId(orderDTO.getOrderId());
         order.setUserId(orderDTO.getUserId());
         order.setStatus(orderDTO.getStatus());
         order.setPaymentStatus(orderDTO.getPaymentStatus());
-
-        // Populate fields from BaseDTO if applicable
         order.setIsActive(Boolean.TRUE);
         order.setCreatedBy(orderDTO.getCreatedBy());
         order.setCreatedDate(orderDTO.getCreatedDate());
         order.setUpdatedBy(orderDTO.getUpdatedBy());
         order.setUpdatedDate(orderDTO.getUpdatedDate());
-
         return order;
     }
 
@@ -71,7 +63,6 @@ public class OrderSupport {
         if (Objects.isNull(existingOrder) || Objects.isNull(orderDTO)) {
             return;
         }
-
         existingOrder.setStatus(orderDTO.getStatus());
         existingOrder.setPaymentStatus(orderDTO.getPaymentStatus());
         existingOrder.setUpdatedBy(orderDTO.getUpdatedBy());

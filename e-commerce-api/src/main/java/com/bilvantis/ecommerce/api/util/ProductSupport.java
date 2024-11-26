@@ -1,6 +1,5 @@
 package com.bilvantis.ecommerce.api.util;
 
-import com.bilvantis.ecommerce.dao.data.model.Category;
 import com.bilvantis.ecommerce.dao.data.model.Product;
 import com.bilvantis.ecommerce.dto.model.ProductDTO;
 

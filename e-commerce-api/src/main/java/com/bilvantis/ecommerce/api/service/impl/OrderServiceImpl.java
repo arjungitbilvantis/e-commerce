@@ -1,10 +1,20 @@
 package com.bilvantis.ecommerce.api.service.impl;
 
 import com.bilvantis.ecommerce.api.exception.ApplicationException;
+import com.bilvantis.ecommerce.api.service.InventoryService;
 import com.bilvantis.ecommerce.api.service.OrderService;
+import com.bilvantis.ecommerce.api.service.OrderStatus;
+import com.bilvantis.ecommerce.api.service.PaymentService;
 import com.bilvantis.ecommerce.dao.data.model.Order;
+import com.bilvantis.ecommerce.dao.data.model.OrderItem;
+import com.bilvantis.ecommerce.dao.data.model.User;
+import com.bilvantis.ecommerce.dao.data.repository.OrderItemRepository;
 import com.bilvantis.ecommerce.dao.data.repository.OrderRepository;
+import com.bilvantis.ecommerce.dao.data.repository.ProductRepository;
+import com.bilvantis.ecommerce.dao.data.repository.UserRepository;
+import com.bilvantis.ecommerce.dto.model.InventoryDTO;
 import com.bilvantis.ecommerce.dto.model.OrderDTO;
+import com.bilvantis.ecommerce.dto.model.OrderItemDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -14,20 +24,33 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.bilvantis.ecommerce.api.util.OrderConstants.*;
 import static com.bilvantis.ecommerce.api.util.OrderSupport.convertOrderDTOToOrderEntity;
 import static com.bilvantis.ecommerce.api.util.OrderSupport.convertOrderEntityToOrderDTO;
+import static com.bilvantis.ecommerce.api.util.ProductConstants.PRODUCT_NOT_FOUND;
+import static com.bilvantis.ecommerce.api.util.UserConstants.USER_NOT_FOUND;
 
 @Service("orderServiceImpl")
 public class OrderServiceImpl implements OrderService<OrderDTO, String> {
 
     private final OrderRepository orderRepository;
+    private final InventoryService<InventoryDTO, UUID> inventoryService;
+    private final PaymentService paymentService;
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final OrderItemRepository orderItemRepository;
 
-    public OrderServiceImpl(OrderRepository orderRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, InventoryService<InventoryDTO, UUID> inventoryService, PaymentService paymentService, UserRepository userRepository, ProductRepository productRepository, OrderItemRepository orderItemRepository) {
         this.orderRepository = orderRepository;
+        this.inventoryService = inventoryService;
+        this.paymentService = paymentService;
+        this.userRepository = userRepository;
+        this.productRepository = productRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     /**
@@ -41,28 +64,60 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
     @Override
     public OrderDTO createOrder(OrderDTO orderDTO) {
         try {
-            // Create a new order entity from the DTO
+            // Check if the user exists in the database
+            User user = userRepository.findById(orderDTO.getUserId())  // Assuming OrderDTO has userId field
+                    .orElseThrow(() -> new ApplicationException(String.format(USER_NOT_FOUND, orderDTO.getUserId())));
+
+            // Convert List<OrderItemDTO> to Map<String, Integer>
+            Map<String, Integer> itemsMap = orderDTO.getItems()
+                    .stream()
+                    .collect(Collectors.toMap(OrderItemDTO::getProductId, OrderItemDTO::getQuantity));
+
+            // Check if each product exists in the database
+            for (String productId : itemsMap.keySet()) {
+                boolean productExists = productRepository.existsById(productId);
+                if (!productExists) {
+                    throw new ApplicationException(String.format(PRODUCT_NOT_FOUND, productId));
+                }
+            }
+
+            // Check stock availability
+            boolean isStockAvailable = inventoryService.isStockAvailable(itemsMap);
+            if (!isStockAvailable) {
+                throw new ApplicationException(ORDER_OUT_OF_STOCK);
+            }
+
+            // Reserve stock
+            inventoryService.reserveStock(itemsMap);
+
+            // Create the order
             Order order = convertOrderDTOToOrderEntity(orderDTO);
-
-            // Generate a random UUID for orderId before saving
-            UUID generatedOrderId = UUID.randomUUID();
-            Objects.requireNonNull(order).setOrderId(generatedOrderId.toString());
-
-            // Set default status and payment status if not provided
-            order.setStatus(orderDTO.getStatus() != null ? orderDTO.getStatus() : ORDER_STATUS_PENDING);
-            order.setPaymentStatus(orderDTO.getPaymentStatus() != null ? orderDTO.getPaymentStatus() : PAYMENT_STATUS_UNPAID);
-
-            // Set the created date
+            order.setOrderId(UUID.randomUUID().toString());
+            order.setStatus(ORDER_STATUS_PENDING);
             order.setCreatedDate(new Date());
-
-            // Save the order entity
+            order.setUserId(user.getUserId());
             Order savedOrder = orderRepository.save(order);
+
+            // Save each order item to the order_items table
+            saveOrderItems(savedOrder, orderDTO.getItems());
 
             return convertOrderEntityToOrderDTO(savedOrder);
         } catch (DataAccessException e) {
             throw new ApplicationException(ORDER_CREATION_FAILED, e);
         }
     }
+
+    private void saveOrderItems(Order savedOrder, List<OrderItemDTO> items) {
+        for (OrderItemDTO itemDTO : items) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrderItemId(UUID.randomUUID().toString());  // Generate a unique ID for the order item
+            orderItem.setOrder(savedOrder);  // Link the order to this order item
+            orderItem.setProductId(itemDTO.getProductId());  // Set the product ID
+            orderItem.setQuantity(itemDTO.getQuantity());  // Set the quantity
+            orderItemRepository.save(orderItem);  // Save the order item to the database
+        }
+    }
+
 
     /**
      * Updates the status of an order.
@@ -76,17 +131,46 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
     @Override
     public OrderDTO updateOrderStatus(String orderId, String status) {
         try {
+            // Validate the status using the enum
+            if (!OrderStatus.isValidStatus(status)) {
+                throw new ApplicationException(String.format(INVALID_ORDER_STATUS, status));
+            }
+
+            // Fetch the existing order from the database
             Order order = orderRepository.findByOrderId(orderId)
                     .orElseThrow(() -> new ApplicationException(String.format(ORDER_NOT_FOUND, orderId)));
 
+            // Fetch the associated user to validate their existence
+            User user = userRepository.findById(order.getUserId())
+                    .orElseThrow(() -> new ApplicationException(String.format(USER_NOT_FOUND, order.getUserId())));
+
+            // If the status is "CONFIRMED", check payment status
+            if (OrderStatus.CONFIRMED.getStatus().equals(status)) {
+                Boolean isPaymentSuccessful = paymentService.verifyPayment(orderId);
+                if (!isPaymentSuccessful) {
+                    throw new ApplicationException(PAYMENT_FAILED);
+                }
+            }
+
+            // If the status is "FAILED" or any other status, you might want to handle stock rollback or additional actions
+            if (OrderStatus.FAILED.getStatus().equals(status)) {
+                // Rollback stock if order failed, you can also add logic to handle other actions based on business rules
+                inventoryService.rollbackStock(order);
+            }
+
+            // Update the order status
             order.setStatus(status);
+
+            // Save the updated order
             orderRepository.save(order);
 
+            // Return the updated order as a DTO
             return convertOrderEntityToOrderDTO(order);
         } catch (DataAccessException e) {
             throw new ApplicationException(String.format(ORDER_UPDATE_FAILED, orderId), e);
         }
     }
+
 
     /**
      * Retrieves the details of an order by ID.

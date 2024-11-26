@@ -10,4 +10,8 @@ public class OrderConstants {
     public static final String ORDER_UPDATE_FAILED = "Failed to update the order with ID: %s.";
     public static final String ORDER_FETCH_FAILED = "Failed to fetch the order with ID: %s.";
     public static final String PENDING_ORDERS_CHECK_FAILED = "Failed to process pending orders.";
+    public static final String ORDER_OUT_OF_STOCK = "Order cannot be created as items are out of stock.";
+    public static final String ORDER_STATUS_CONFIRMED = "CONFIRMED";
+    public static final String PAYMENT_FAILED = "Payment failed for order: ";
+    public static final String INVALID_ORDER_STATUS = "Invalid order status: %s";
 }
