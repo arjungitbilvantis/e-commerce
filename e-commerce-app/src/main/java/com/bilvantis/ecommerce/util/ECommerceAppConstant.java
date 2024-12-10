@@ -14,5 +14,6 @@ public class ECommerceAppConstant {
     public static final String INVALID_OR_EXPIRED_TOKEN = "Invalid or expired token";
     public static final String TOKEN_PROCESSING_ERROR = "Token processing error";
     public static final String USER_NOT_FOUND = "User not found with phone number: %s";
+    public static final String TOKEN_EXPIRED_CODE = "AUTH_TOKEN_EXPIRED";
 
 }

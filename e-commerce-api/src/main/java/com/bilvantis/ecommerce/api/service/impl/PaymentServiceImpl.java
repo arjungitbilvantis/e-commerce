@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static com.bilvantis.ecommerce.api.util.PaymentConstants.SUCCESS_THRESHOLD;
+
 @Service("paymentServiceImpl")
 public class PaymentServiceImpl implements PaymentService {
 
@@ -36,14 +38,13 @@ public class PaymentServiceImpl implements PaymentService {
 
     /**
      * Simulates interaction with a payment gateway.
-     * In a real-world scenario, this would involve making an HTTP request to a payment provider's API.
      *
      * @param orderId The order ID for which payment is to be processed.
      * @return boolean indicating whether the payment gateway interaction was successful.
      */
     private Boolean simulatePaymentGatewayInteraction(String orderId) {
         // Simulates 50% chance of success
-        return Math.random() > 0.5;
+        return Math.random() > SUCCESS_THRESHOLD;
     }
 
     /**

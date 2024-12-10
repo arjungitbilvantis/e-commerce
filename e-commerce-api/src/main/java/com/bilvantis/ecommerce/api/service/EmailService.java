@@ -7,5 +7,6 @@ import com.bilvantis.ecommerce.dao.data.model.User;
 public interface EmailService {
     void sendMailOtpGeneration(EmailDetails emailDetails, User user);
     void sendLowStockAlert(EmailDetails emailDetails, String productId, int availableItems);
-
+    void sendOrderConfirmationEmail(EmailDetails emailDetails, User user, String orderId);
+    void sendOrderFailureEmail(EmailDetails emailDetails, User user, String orderId);
 }

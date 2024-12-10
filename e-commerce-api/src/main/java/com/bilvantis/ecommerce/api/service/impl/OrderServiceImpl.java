@@ -1,10 +1,8 @@
 package com.bilvantis.ecommerce.api.service.impl;
 
 import com.bilvantis.ecommerce.api.exception.ApplicationException;
-import com.bilvantis.ecommerce.api.service.InventoryService;
-import com.bilvantis.ecommerce.api.service.OrderService;
-import com.bilvantis.ecommerce.api.service.OrderStatus;
-import com.bilvantis.ecommerce.api.service.PaymentService;
+import com.bilvantis.ecommerce.api.service.*;
+import com.bilvantis.ecommerce.api.util.EmailDetails;
 import com.bilvantis.ecommerce.dao.data.model.Order;
 import com.bilvantis.ecommerce.dao.data.model.OrderItem;
 import com.bilvantis.ecommerce.dao.data.model.User;
@@ -43,14 +41,16 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final OrderItemRepository orderItemRepository;
+    private final EmailService emailService;
 
-    public OrderServiceImpl(OrderRepository orderRepository, InventoryService<InventoryDTO, UUID> inventoryService, PaymentService paymentService, UserRepository userRepository, ProductRepository productRepository, OrderItemRepository orderItemRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, InventoryService<InventoryDTO, UUID> inventoryService, PaymentService paymentService, UserRepository userRepository, ProductRepository productRepository, OrderItemRepository orderItemRepository, EmailService emailService) {
         this.orderRepository = orderRepository;
         this.inventoryService = inventoryService;
         this.paymentService = paymentService;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.orderItemRepository = orderItemRepository;
+        this.emailService = emailService;
     }
 
     /**
@@ -82,7 +82,7 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
             }
 
             // Check stock availability
-            boolean isStockAvailable = inventoryService.isStockAvailable(itemsMap);
+            Boolean isStockAvailable = inventoryService.isStockAvailable(itemsMap);
             if (!isStockAvailable) {
                 throw new ApplicationException(ORDER_OUT_OF_STOCK);
             }
@@ -158,7 +158,7 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
                     .orElseThrow(() -> new ApplicationException(String.format(ORDER_NOT_FOUND, orderId)));
 
             // Fetch the associated user to validate their existence
-            userRepository.findById(order.getUserId())
+            User user = userRepository.findById(order.getUserId())
                     .orElseThrow(() -> new ApplicationException(String.format(USER_NOT_FOUND, order.getUserId())));
 
             // If the status is "CONFIRMED", check payment status
@@ -181,6 +181,13 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
             // Save the updated order
             orderRepository.save(order);
 
+            // Send order confirmation or failure email based on the status
+            if (OrderStatus.CONFIRMED.getStatus().equals(status)) {
+                sendOrderConfirmationEmail(order); // Send order confirmation email
+            } else if (OrderStatus.FAILED.getStatus().equals(status)) {
+                sendOrderFailureEmail(order); // Send order failure email
+            }
+
             // Return the updated order as a DTO
             return convertOrderEntityToOrderDTO(order);
         } catch (DataAccessException e) {
@@ -189,6 +196,38 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
         }
     }
 
+    /**
+     * Sends an email to the user informing them about the confirmation of their order.
+     *
+     * @param order The order that has been confirmed
+     */
+    private void sendOrderConfirmationEmail(Order order) {
+        try {
+            // Fetch user details based on userId
+            User user = userRepository.findById(order.getUserId())
+                    .orElseThrow(() -> new ApplicationException("User not found"));
+
+            // Compose email details
+            String emailSubject = "Your Order Has Been Confirmed";
+            String emailBody = String.format(
+                    "Dear %s,\n\nWe are pleased to inform you that your order with ID %s has been successfully confirmed.\n\nThank you for shopping with us!\n\nBest regards,\nThe E-Commerce Team",
+                    user.getFirstName(), order.getOrderId()
+            );
+
+            // Create an EmailDetails object to pass to the email service
+//            EmailDetails emailDetails = new EmailDetails(user.getEmail(), emailSubject, emailBody);
+            EmailDetails emailDetails = new EmailDetails();
+            emailDetails.setRecipient(user.getEmail());
+            emailDetails.setSubject(emailSubject);
+            emailDetails.setMessageBody(emailBody);
+            // Use the EmailService to send the email
+            emailService.sendOrderConfirmationEmail(emailDetails, user, order.getOrderId());
+
+            log.info("Order confirmation email sent successfully to {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send confirmation email for order {}: {}", order.getOrderId(), e.getMessage());
+        }
+    }
 
     /**
      * Retrieves the details of an order by ID.
@@ -237,6 +276,9 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
                         // Mark the order as failed
                         order.setStatus(ORDER_STATUS_FAILED);
                         orderRepository.save(order);  // Save the updated order
+
+                        // Send email to user notifying them about the failure
+                        sendOrderFailureEmail(order);
                     }
                 } catch (Exception e) {
                     log.error(ERROR_PENDING_ORDERS_UPDATE_FAILED, order.getOrderId(), e);
@@ -247,6 +289,39 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
             throw new ApplicationException(ERROR_PENDING_ORDERS_CHECK_FAILED, e);
         }
 
+    }
+
+    /**
+     * Sends an email to the user informing them about the failure of their order.
+     *
+     * @param order The order that has failed
+     */
+    private void sendOrderFailureEmail(Order order) {
+        try {
+            // Fetch user details based on userId
+            User user = userRepository.findById(order.getUserId())
+                    .orElseThrow(() -> new ApplicationException("User not found"));
+
+            // Compose email details
+            String emailSubject = "Your Order Has Failed";
+            String emailBody = String.format(
+                    "Dear %s,\n\nWe regret to inform you that your order with ID %s has failed because it was pending for more than 24 hours.\n\nWe apologize for the inconvenience caused.\n\nBest regards,\nThe E-Commerce Team",
+                    user.getFirstName(), order.getOrderId()
+            );
+
+            // Create an EmailDetails object to pass to the email service
+//            EmailDetails emailDetails = new EmailDetails(user.getEmail(), emailSubject, emailBody);
+            EmailDetails emailDetails = new EmailDetails();
+            emailDetails.setRecipient(user.getEmail());
+            emailDetails.setSubject(emailSubject);
+            emailDetails.setMessageBody(emailBody);
+            // Use the EmailService to send the email
+            emailService.sendOrderFailureEmail(emailDetails, user, order.getOrderId());
+
+            log.info("Order failure email sent successfully to {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send failure email for order {}: {}", order.getOrderId(), e.getMessage());
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import com.bilvantis.ecommerce.api.exception.ErrorResponse;
 import com.bilvantis.ecommerce.model.UserResponseDTO;
 import com.bilvantis.ecommerce.util.UserRequestResponseBuilder;
 import com.bilvantis.ecommerce.util.ECommerceAppConstant;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
@@ -90,5 +91,19 @@ public class ECommerceAppExceptionHandler {
             errors.add(new ErrorResponse(constraintViolation.getMessage(), Objects.nonNull(lastNode) ? lastNode.getName() : null));
         });
         return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ECommerceAppConstant.ERROR), HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles ExpiredJwtException and returns a response indicating the token has expired.
+     *
+     * @param exception the ExpiredJwtException thrown when the JWT token is expired
+     * @return a ResponseEntity containing a UserResponseDTO with error details and an UNAUTHORIZED status
+     */
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<UserResponseDTO> handleExpiredJwtException(ExpiredJwtException exception) {
+        ErrorResponse errorResponse = new ErrorResponse(exception.getMessage(), ECommerceAppConstant.TOKEN_EXPIRED_CODE);
+        List<ErrorResponse> errors = new ArrayList<>();
+        errors.add(errorResponse);
+        return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(null, errors, ECommerceAppConstant.ERROR), HttpStatus.UNAUTHORIZED);
     }
 }

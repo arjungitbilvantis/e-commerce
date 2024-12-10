@@ -44,7 +44,7 @@ public class EmailServiceImpl implements EmailService {
             emailTemplateContent = emailTemplateContent.replace(OTP_PLACEHOLDER, user.getOtp());
             emailTemplateContent = emailTemplateContent.replace(NAME_PLACEHOLDER, user.getFirstName());
 
-            messageHelper.setText(emailTemplateContent, true);
+            messageHelper.setText(emailTemplateContent, Boolean.TRUE);
             javaMailSender.send(mimeMessage);
 
         } catch (Exception e) {
@@ -55,8 +55,8 @@ public class EmailServiceImpl implements EmailService {
     /**
      * Sends a low-stock alert email to an administrator.
      *
-     * @param emailDetails EmailDetails containing recipient and subject details.
-     * @param productId    ID of the product with low stock.
+     * @param emailDetails   EmailDetails containing recipient and subject details.
+     * @param productId      ID of the product with low stock.
      * @param availableItems Current stock quantity of the product.
      */
     @Override
@@ -73,14 +73,70 @@ public class EmailServiceImpl implements EmailService {
             emailTemplateContent = emailTemplateContent.replace(PRODUCT_ID_PLACEHOLDER, productId);
             emailTemplateContent = emailTemplateContent.replace(AVAILABLE_ITEMS_PLACEHOLDER, String.valueOf(availableItems));
 
-            messageHelper.setText(emailTemplateContent, true);
+            messageHelper.setText(emailTemplateContent, Boolean.TRUE);
             javaMailSender.send(mimeMessage);
 
         } catch (Exception e) {
-            throw new ApplicationException("Failed to send low-stock alert email: " + e.getMessage());
+            throw new ApplicationException(LOW_STOCK_ALERT_EMAIL_FAILURE + e.getMessage());
         }
     }
 
+    /**
+     * Sends an order confirmation email to the user.
+     *
+     * @param emailDetails EmailDetails containing recipient and subject details.
+     * @param user         The user who placed the order.
+     * @param orderId      The order ID that was confirmed.
+     */
+    @Override
+    public void sendOrderConfirmationEmail(EmailDetails emailDetails, User user, String orderId) {
+        try {
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = settingMimeMessageHelper(emailDetails, mimeMessage, SENDER_EMAIL);
 
+            // Load the order confirmation email template
+            ClassPathResource emailTemplateResource = new ClassPathResource(ORDER_CONFIRMATION_EMAIL_TEMPLATE_PATH);
+            String emailTemplateContent = new String(FileCopyUtils.copyToByteArray(emailTemplateResource.getInputStream()), StandardCharsets.UTF_8);
+
+            // Replace placeholders with order-specific details
+            emailTemplateContent = emailTemplateContent.replace(ORDER_ID_PLACEHOLDER, orderId);
+            emailTemplateContent = emailTemplateContent.replace(USER_NAME_PLACEHOLDER, user.getFirstName());
+
+            messageHelper.setText(emailTemplateContent, Boolean.TRUE);
+            javaMailSender.send(mimeMessage);
+
+        } catch (Exception e) {
+            throw new ApplicationException("Failed to send order confirmation email: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sends an order failure email to the user.
+     *
+     * @param emailDetails EmailDetails containing recipient and subject details.
+     * @param user         The user who placed the order.
+     * @param orderId      The order ID that failed.
+     */
+    @Override
+    public void sendOrderFailureEmail(EmailDetails emailDetails, User user, String orderId) {
+        try {
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = settingMimeMessageHelper(emailDetails, mimeMessage, SENDER_EMAIL);
+
+            // Load the order failure email template
+            ClassPathResource emailTemplateResource = new ClassPathResource(ORDER_FAILURE_EMAIL_TEMPLATE_PATH);
+            String emailTemplateContent = new String(FileCopyUtils.copyToByteArray(emailTemplateResource.getInputStream()), StandardCharsets.UTF_8);
+
+            // Replace placeholders with order-specific details
+            emailTemplateContent = emailTemplateContent.replace(ORDER_ID_PLACEHOLDER, orderId);
+            emailTemplateContent = emailTemplateContent.replace(USER_NAME_PLACEHOLDER, user.getFirstName());
+
+            messageHelper.setText(emailTemplateContent, Boolean.TRUE);
+            javaMailSender.send(mimeMessage);
+
+        } catch (Exception e) {
+            throw new ApplicationException("Failed to send order failure email: " + e.getMessage());
+        }
+    }
 
 }

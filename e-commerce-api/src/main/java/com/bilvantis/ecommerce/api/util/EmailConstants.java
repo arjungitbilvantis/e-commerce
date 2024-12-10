@@ -9,4 +9,13 @@ public class EmailConstants {
     public static final String LOW_STOCK_EMAIL_TEMPLATE_PATH = "low_stock_alert.html";
     public static final String PRODUCT_ID_PLACEHOLDER = "{{product_id}}";
     public static final String AVAILABLE_ITEMS_PLACEHOLDER = "{{available_items}}";
+    public static final String LOW_STOCK_ALERT_EMAIL_FAILURE = "Failed to send low-stock alert email: ";
+
+    // New constants for Order Confirmation and Failure Emails
+    public static final String ORDER_CONFIRMATION_EMAIL_TEMPLATE_PATH = "order_confirmation_template.html";
+    public static final String ORDER_FAILURE_EMAIL_TEMPLATE_PATH = "order_failure_template.html";
+
+    // Placeholders for Order Confirmation and Failure Emails
+    public static final String ORDER_ID_PLACEHOLDER = "${order_id}";
+    public static final String USER_NAME_PLACEHOLDER = "${user_name}";
 }

@@ -73,7 +73,7 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
 
                     return inventoryRepository.findByProductId(productId)
                             .map(inventory -> inventory.getAvailableItems() >= quantityRequested)
-                            .orElse(false); // If inventory is not found, return false
+                            .orElse(Boolean.FALSE); // If inventory is not found, return false
                 });
     }
 
@@ -93,7 +93,7 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
                     // Check availability and update the stock atomically using optimistic locking
                     Optional<Inventory> inventoryOpt = inventoryRepository.findByProductId(productId);
                     if (inventoryOpt.isEmpty()) {
-                        return false;  // Product doesn't exist
+                        return Boolean.FALSE;  // Product doesn't exist
                     }
 
                     Inventory inventory = inventoryOpt.get();
@@ -103,7 +103,7 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
                     }
 
                     if (inventory.getAvailableItems() < quantityToReserve) {
-                        return false;  // Not enough stock
+                        return Boolean.FALSE;  // Not enough stock
                     }
 
                     // Update the stock: decrement available items and increment reserved items
@@ -113,9 +113,9 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
                     // Save the updated inventory and handle optimistic locking
                     try {
                         inventoryRepository.save(inventory);
-                        return true;
+                        return Boolean.TRUE;
                     } catch (OptimisticLockingFailureException e) {
-                        return false;
+                        return Boolean.FALSE;
                     }
                 });
     }
@@ -149,13 +149,13 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
                 try {
                     inventoryRepository.save(inventory);
                 } catch (OptimisticLockingFailureException e) {
-                    return false; // If there was a concurrency issue, return false
+                    return Boolean.FALSE; // If there was a concurrency issue, return false
                 }
             } else {
-                return false; // If there was not enough reserved stock to rollback
+                return Boolean.FALSE; // If there was not enough reserved stock to rollback
             }
         }
-        return true; // If all stock updates were successful
+        return Boolean.TRUE; // If all stock updates were successful
     }
 
 

@@ -1,7 +1,11 @@
 package com.bilvantis.ecommerce.config;
 
+import com.bilvantis.ecommerce.api.exception.ErrorResponse;
 import com.bilvantis.ecommerce.api.util.JwtUtil;
+import com.bilvantis.ecommerce.model.UserResponseDTO;
 import com.bilvantis.ecommerce.util.ECommerceAppConstant;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,7 +52,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (Objects.nonNull(authorizationHeader) && authorizationHeader.startsWith(ECommerceAppConstant.BEARER_PREFIX)) {
             jwt = authorizationHeader.substring(7);
-            phoneNumber = jwtUtil.extractUsername(jwt);
+            try {
+                phoneNumber = jwtUtil.extractUsername(jwt); // This might throw ExpiredJwtException
+            } catch (ExpiredJwtException e) {
+                // Handle expired token
+                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Token has expired. Please login again.", ECommerceAppConstant.TOKEN_EXPIRED_CODE);
+                return;
+            } catch (Exception e) {
+                // Handle other JWT processing errors
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write(ECommerceAppConstant.INVALID_OR_EXPIRED_TOKEN);
+                return;
+            }
         }
 
         if (Objects.nonNull(phoneNumber) && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
@@ -72,6 +88,30 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * Helper method to send a standardized error response.
+     */
+    private void sendErrorResponse(HttpServletResponse response, int status, String message, String fieldId) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+
+        // Construct the error response
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setMessage(message);
+        errorResponse.setFieldId(fieldId);
+
+        UserResponseDTO userResponseDTO = new UserResponseDTO();
+        userResponseDTO.setBody(null);
+        userResponseDTO.setStatus(ECommerceAppConstant.ERROR);
+        userResponseDTO.setErrors(Collections.singletonList(errorResponse));
+
+        // Convert the response to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(userResponseDTO);
+
+        response.getWriter().write(jsonResponse);
     }
 
     @Override

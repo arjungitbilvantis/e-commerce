@@ -35,12 +35,12 @@ public class OrderSupport {
 
         // Handle null items list by initializing as an empty list if needed
         List<OrderItemDTO> orderItemDTOList = Optional.ofNullable(order.getItems())
-                .orElse(Collections.emptyList())  // If items is null, return an empty list
+                .orElse(Collections.emptyList())
                 .stream()
-                .map(OrderSupport::convertOrderItemEntityToDTO)  // Assuming a helper method for converting OrderItem
+                .map(OrderSupport::convertOrderItemEntityToDTO)
                 .collect(Collectors.toList());
 
-        orderDTO.setItems(orderItemDTOList); // Set the items in the OrderDTO
+        orderDTO.setItems(orderItemDTOList);
 
         // Return the populated OrderDTO
         return orderDTO;
@@ -55,16 +55,14 @@ public class OrderSupport {
      */
     private static OrderItemDTO convertOrderItemEntityToDTO(OrderItem orderItem) {
         if (Objects.isNull(orderItem)) {
-            return null; // Return null if the OrderItem entity is null
+            return null;
         }
-
         // Create and populate the OrderItemDTO
         OrderItemDTO orderItemDTO = new OrderItemDTO();
         orderItemDTO.setOrderItemId(orderItem.getOrderItemId());
         orderItemDTO.setOrderId(orderItem.getOrder().getOrderId());
         orderItemDTO.setProductId(orderItem.getProductId());
         orderItemDTO.setQuantity(orderItem.getQuantity());
-
         return orderItemDTO;
     }
 

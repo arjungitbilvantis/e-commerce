@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.bilvantis.ecommerce.api.util.CategoryConstants.CATEGORY_NOT_FOUND;
 import static com.bilvantis.ecommerce.api.util.CategorySupport.*;
 
 @Service("categoryServiceImpl")
@@ -42,7 +43,7 @@ public class CategoryServiceImpl implements CategoryService<CategoryDTO, UUID> {
     @Transactional
     public CategoryDTO updateCategory(String categoryId, CategoryDTO categoryDTO) {
         Category existingCategory = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND));
         updateCategoryFromDTO(existingCategory, categoryDTO);
         categoryRepository.save(existingCategory);
         return convertCategoryEntityToCategoryDTO(existingCategory);
@@ -52,14 +53,14 @@ public class CategoryServiceImpl implements CategoryService<CategoryDTO, UUID> {
     @Transactional
     public void deleteCategory(String categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND));
         categoryRepository.delete(category);
     }
 
     @Override
     public CategoryDTO getCategoryById(String categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CATEGORY_NOT_FOUND));
         return convertCategoryEntityToCategoryDTO(category);
     }
 
