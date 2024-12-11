@@ -18,4 +18,6 @@ public class EmailConstants {
     // Placeholders for Order Confirmation and Failure Emails
     public static final String ORDER_ID_PLACEHOLDER = "${order_id}";
     public static final String USER_NAME_PLACEHOLDER = "${user_name}";
+    public static final String FAILED_TO_SEND_ORDER_FAILURE_EMAIL = "Failed to send order failure email: ";
+    public static final String FAILED_TO_SEND_ORDER_CONFIRMATION_EMAIL = "Failed to send order confirmation email: ";
 }

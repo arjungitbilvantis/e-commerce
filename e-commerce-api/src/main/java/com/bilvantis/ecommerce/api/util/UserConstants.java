@@ -4,8 +4,6 @@ public class UserConstants {
 
     public static final String PHONE_NUMBER_EXISTS = "A user with the phone number %s already exists.";
     public static final String EMAIL_EXISTS = "A user with the email %s already exists.";
-
-    public static final String USER_SAVE_FAILED = "User save failed.";
     public static final String USER_NOT_FOUND = "User not found with id: %s";
     public static final String USER_FETCH_FAILED = "Error fetching user by id.";
     public static final String USERS_FETCH_FAILED = "Error fetching users list.";

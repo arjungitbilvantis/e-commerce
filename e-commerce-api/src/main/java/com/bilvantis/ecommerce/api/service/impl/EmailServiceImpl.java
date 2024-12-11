@@ -106,7 +106,7 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(mimeMessage);
 
         } catch (Exception e) {
-            throw new ApplicationException("Failed to send order confirmation email: " + e.getMessage());
+            throw new ApplicationException(FAILED_TO_SEND_ORDER_CONFIRMATION_EMAIL + e.getMessage());
         }
     }
 
@@ -135,7 +135,7 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(mimeMessage);
 
         } catch (Exception e) {
-            throw new ApplicationException("Failed to send order failure email: " + e.getMessage());
+            throw new ApplicationException(FAILED_TO_SEND_ORDER_FAILURE_EMAIL + e.getMessage());
         }
     }
 

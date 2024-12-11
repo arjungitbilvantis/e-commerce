@@ -24,14 +24,12 @@ public class PaymentServiceImpl implements PaymentService {
         if (Objects.isNull(orderId) || orderId.isEmpty()) {
             return Boolean.FALSE;
         }
-
         // Simulating payment gateway interaction
         Boolean paymentGatewayResponse = simulatePaymentGatewayInteraction(orderId);
 
         if (!paymentGatewayResponse) {
             return Boolean.FALSE; // Payment failed
         }
-
         // Simulating payment success
         return Boolean.TRUE; // Payment successful
     }

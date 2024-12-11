@@ -26,6 +26,12 @@ public class CategoryServiceImpl implements CategoryService<CategoryDTO, UUID> {
         this.categoryRepository = categoryRepository;
     }
 
+    /**
+     * Creates a new category.
+     *
+     * @param categoryDTO the category data transfer object containing the details of the category to be created
+     * @return the created category as a data transfer object
+     */
     @Override
     @Transactional
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
@@ -39,6 +45,14 @@ public class CategoryServiceImpl implements CategoryService<CategoryDTO, UUID> {
         return convertCategoryEntityToCategoryDTO(category);
     }
 
+    /**
+     * Updates an existing category.
+     *
+     * @param categoryId  the ID of the category to be updated
+     * @param categoryDTO the category data transfer object containing the updated details of the category
+     * @return the updated category as a data transfer object
+     * @throws ResourceNotFoundException if the category with the specified ID is not found
+     */
     @Override
     @Transactional
     public CategoryDTO updateCategory(String categoryId, CategoryDTO categoryDTO) {
@@ -49,6 +63,12 @@ public class CategoryServiceImpl implements CategoryService<CategoryDTO, UUID> {
         return convertCategoryEntityToCategoryDTO(existingCategory);
     }
 
+    /**
+     * Deletes a category.
+     *
+     * @param categoryId the ID of the category to be deleted
+     * @throws ResourceNotFoundException if the category with the specified ID is not found
+     */
     @Override
     @Transactional
     public void deleteCategory(String categoryId) {
@@ -57,6 +77,13 @@ public class CategoryServiceImpl implements CategoryService<CategoryDTO, UUID> {
         categoryRepository.delete(category);
     }
 
+    /**
+     * Retrieves a category by its ID.
+     *
+     * @param categoryId the ID of the category to be retrieved
+     * @return the category as a data transfer object
+     * @throws ResourceNotFoundException if the category with the specified ID is not found
+     */
     @Override
     public CategoryDTO getCategoryById(String categoryId) {
         Category category = categoryRepository.findById(categoryId)
@@ -64,6 +91,11 @@ public class CategoryServiceImpl implements CategoryService<CategoryDTO, UUID> {
         return convertCategoryEntityToCategoryDTO(category);
     }
 
+    /**
+     * Retrieves all categories.
+     *
+     * @return a list of all categories as data transfer objects
+     */
     @Override
     public List<CategoryDTO> getAllCategories() {
         return categoryRepository.findAll().stream()

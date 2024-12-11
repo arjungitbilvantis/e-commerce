@@ -10,11 +10,10 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 
+import static com.bilvantis.ecommerce.api.util.JwtConstants.*;
+
 @Component
 public class JwtUtil {
-
-    // The SECRET can be any string, but we'll generate a secure key for HS512
-    private static final String SECRET = "4027d080f9a3954189ebca5ddbbfdfc9cb824314c0d6c910eff8bec1c689eabc";
 
     // Generate the Key using the correct size (HS512 requires 512 bits or 64 bytes)
     private Key getSignKey() {
@@ -36,13 +35,13 @@ public class JwtUtil {
         // Create JWT token based on the phone number
         return Jwts.builder()
                 .setSubject(user.getPhoneNumber())  // Use phone number as subject
-                .claim("user_id", user.getUserId())
-                .claim("phone_number", user.getPhoneNumber())
-                .claim("email", user.getEmail())
-                .claim("first_name", user.getFirstName())
-                .claim("last_name", user.getLastName())
+                .claim(CLAIM_USER_ID, user.getUserId())
+                .claim(CLAIM_PHONE_NUMBER, user.getPhoneNumber())
+                .claim(CLAIM_EMAIL, user.getEmail())
+                .claim(CLAIM_FIRST_NAME, user.getFirstName())
+                .claim(CLAIM_LAST_NAME, user.getLastName())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000))  // 1 hour
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MILLIS))  // 1 hour
                 .signWith(getSignKey(), SignatureAlgorithm.HS512)
                 .compact();
     }

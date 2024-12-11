@@ -319,9 +319,8 @@ public class ProductServiceImpl implements ProductService<ProductDTO, UUID> {
         inventory.setAvailableItems(Objects.nonNull(availableItems) ? availableItems : 10);
 
         // Set the default lower threshold
-        inventory.setLowerThreshold(5);
+        inventory.setLowerThreshold(FIVE);
         inventory.setIsActive(Boolean.TRUE);
-
         inventoryRepository.save(inventory);
     }
 

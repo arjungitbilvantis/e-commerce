@@ -52,7 +52,6 @@ public class LoginController {
      */
     @PostMapping("/one-time-password")
     public ResponseEntity<UserResponseDTO> sendUserOneTimePassword(@NotNull @RequestParam String phoneNumber) {
-
         return new ResponseEntity<>(UserRequestResponseBuilder.buildResponseDTO(loginService.sendOneTimePasswordMail(phoneNumber), null, ECommerceAppConstant.SUCCESS), HttpStatus.OK);
 
     }

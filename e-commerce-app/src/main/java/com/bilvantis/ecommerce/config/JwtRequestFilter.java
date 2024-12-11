@@ -38,6 +38,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Filters incoming HTTP requests to check for JWT authentication and handles expired or invalid tokens.
+     *
+     * @param request     the HttpServletRequest object
+     * @param response    the HttpServletResponse object
+     * @param filterChain the FilterChain object
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (shouldNotFilter(request)) {
@@ -114,6 +121,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         response.getWriter().write(jsonResponse);
     }
 
+    /**
+     * Determines whether the request should be filtered or not based on the request URI.
+     *
+     * @param request the HttpServletRequest object
+     * @return true if the request URI is in the list of excluded paths and should not be filtered, false otherwise
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();

@@ -13,7 +13,10 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.bilvantis.ecommerce.api.util.InventoryConstants.LOW_STOCK_ALERT_SUBJECT;
 
@@ -31,21 +34,10 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
         this.emailService = emailService;
     }
 
-    @Override
-    public InventoryDTO updateInventory(String productId, Integer quantity) {
-        return null;
-    }
-
-    @Override
-    public InventoryDTO getInventoryByProductId(String productId) {
-        return null;
-    }
-
-    @Override
-    public List<InventoryDTO> getAllInventories() {
-        return null;
-    }
-
+    /**
+     * Monitors inventory for items with low stock levels and sends an alert email to the admin.
+     * This method is scheduled to run every 30 minutes.
+     */
     @Override
     @Scheduled(cron = "0 */30 * * * *") // Run every 30minutes
     public void monitorLowStockItems() {
@@ -157,6 +149,5 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
         }
         return Boolean.TRUE; // If all stock updates were successful
     }
-
 
 }

@@ -19,5 +19,6 @@ public class ProductConstants {
     public static final String ERROR_FETCHING_PRODUCTS = "Error occurred while fetching all products. Exception: {}";
     public static final String ERROR_MESSAGE_UPDATING_PRODUCT = "Error occurred while updating product with ID: {}. Exception: {}";
     public static final String ERROR_MESSAGE_DELETING_PRODUCT = "Error occurred while deleting product with ID: {}. Exception: {}";
+    public static final int FIVE = 5;
 
 }

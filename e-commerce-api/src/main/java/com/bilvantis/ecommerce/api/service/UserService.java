@@ -14,5 +14,6 @@ public interface UserService<I extends UserDTO,ID extends Serializable> {
     List<I> getAllUsers();
 
     I updateUserByUserId(String userId,I userDTO);
+
     void deleteUserByUserId(String userId);
 }

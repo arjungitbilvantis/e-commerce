@@ -135,7 +135,6 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
         }
     }
 
-
     /**
      * Updates the status of an order.
      *
@@ -205,27 +204,22 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
         try {
             // Fetch user details based on userId
             User user = userRepository.findById(order.getUserId())
-                    .orElseThrow(() -> new ApplicationException("User not found"));
+                    .orElseThrow(() -> new ApplicationException(String.format(USER_NOT_FOUND, order.getUserId())));
 
             // Compose email details
-            String emailSubject = "Your Order Has Been Confirmed";
-            String emailBody = String.format(
-                    "Dear %s,\n\nWe are pleased to inform you that your order with ID %s has been successfully confirmed.\n\nThank you for shopping with us!\n\nBest regards,\nThe E-Commerce Team",
-                    user.getFirstName(), order.getOrderId()
-            );
+            String emailBody = String.format(ORDER_CONFIRMATION_EMAIL_TEMPLATE, user.getFirstName(), order.getOrderId());
 
             // Create an EmailDetails object to pass to the email service
-//            EmailDetails emailDetails = new EmailDetails(user.getEmail(), emailSubject, emailBody);
             EmailDetails emailDetails = new EmailDetails();
             emailDetails.setRecipient(user.getEmail());
-            emailDetails.setSubject(emailSubject);
+            emailDetails.setSubject(ORDER_CONFIRMED_MESSAGE);
             emailDetails.setMessageBody(emailBody);
             // Use the EmailService to send the email
             emailService.sendOrderConfirmationEmail(emailDetails, user, order.getOrderId());
 
-            log.info("Order confirmation email sent successfully to {}", user.getEmail());
         } catch (Exception e) {
-            log.error("Failed to send confirmation email for order {}: {}", order.getOrderId(), e.getMessage());
+            log.error(CONFIRMATION_EMAIL_FAILURE_MESSAGE, order.getOrderId(), e.getMessage());
+            throw new ApplicationException(e.getMessage());
         }
     }
 
@@ -300,27 +294,22 @@ public class OrderServiceImpl implements OrderService<OrderDTO, String> {
         try {
             // Fetch user details based on userId
             User user = userRepository.findById(order.getUserId())
-                    .orElseThrow(() -> new ApplicationException("User not found"));
+                    .orElseThrow(() -> new ApplicationException(String.format(USER_NOT_FOUND, order.getUserId())));
 
             // Compose email details
-            String emailSubject = "Your Order Has Failed";
-            String emailBody = String.format(
-                    "Dear %s,\n\nWe regret to inform you that your order with ID %s has failed because it was pending for more than 24 hours.\n\nWe apologize for the inconvenience caused.\n\nBest regards,\nThe E-Commerce Team",
-                    user.getFirstName(), order.getOrderId()
-            );
+            String emailBody = String.format(ORDER_FAILURE_EMAIL_TEMPLATE, user.getFirstName(), order.getOrderId());
 
             // Create an EmailDetails object to pass to the email service
-//            EmailDetails emailDetails = new EmailDetails(user.getEmail(), emailSubject, emailBody);
             EmailDetails emailDetails = new EmailDetails();
             emailDetails.setRecipient(user.getEmail());
-            emailDetails.setSubject(emailSubject);
+            emailDetails.setSubject(ORDER_FAILURE_MESSAGE);
             emailDetails.setMessageBody(emailBody);
             // Use the EmailService to send the email
             emailService.sendOrderFailureEmail(emailDetails, user, order.getOrderId());
 
-            log.info("Order failure email sent successfully to {}", user.getEmail());
         } catch (Exception e) {
-            log.error("Failed to send failure email for order {}: {}", order.getOrderId(), e.getMessage());
+            log.error(FAILED_TO_SEND_FAILURE_EMAIL, order.getOrderId(), e.getMessage());
+            throw new ApplicationException(e.getMessage());
         }
     }
 

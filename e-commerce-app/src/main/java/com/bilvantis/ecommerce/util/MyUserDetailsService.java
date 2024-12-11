@@ -17,7 +17,12 @@ public class MyUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-
+    /**
+     * Loads the user details by phone number.
+     *
+     * @param phoneNumber The phone number of the user to be loaded.
+     * @return {@link UserDetails} an implementation of the UserDetails interface containing the user's information.
+     */
     @Override
     public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
         User user = userRepository.findByPhoneNumber(phoneNumber)
