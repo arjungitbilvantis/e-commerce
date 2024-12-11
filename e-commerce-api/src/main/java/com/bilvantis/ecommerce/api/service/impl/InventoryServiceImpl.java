@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.bilvantis.ecommerce.api.util.InventoryConstants.LOW_STOCK_ALERT_SUBJECT;
+import static com.bilvantis.ecommerce.api.util.InventoryConstants.ZERO;
 
 @Service("inventoryServiceImpl")
 public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID> {
@@ -91,7 +92,7 @@ public class InventoryServiceImpl implements InventoryService<InventoryDTO, UUID
                     Inventory inventory = inventoryOpt.get();
 
                     if (Objects.isNull(inventory.getReservedItems())) {
-                        inventory.setReservedItems(0);
+                        inventory.setReservedItems(ZERO);
                     }
 
                     if (inventory.getAvailableItems() < quantityToReserve) {

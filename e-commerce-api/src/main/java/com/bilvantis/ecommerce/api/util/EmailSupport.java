@@ -27,7 +27,7 @@ public class EmailSupport {
             messageHelper.setSubject(emailDetails.getSubject());
             return messageHelper;
         } catch (MessagingException e) {
-            throw new ApplicationException(e);
+            throw new ApplicationException(e.getMessage());
         }
     }
 
