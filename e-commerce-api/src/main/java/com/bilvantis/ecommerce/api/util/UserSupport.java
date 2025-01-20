@@ -67,7 +67,6 @@ public class UserSupport {
         return user;
     }
 
-
     /**
      * Updates the fields of an existing User object based on the values from a UserDTO object.
      *
